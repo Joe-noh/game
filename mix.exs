@@ -3,24 +3,27 @@ defmodule Mj.Umbrella.MixProject do
 
   def project do
     [
+      version: "0.0.1",
       apps_path: "apps",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      releases: releases()
     ]
   end
 
-  # Dependencies can be Hex packages:
-  #
-  #   {:mydep, "~> 0.3.0"}
-  #
-  # Or git/path repositories:
-  #
-  #   {:mydep, git: "https://github.com/elixir-lang/mydep.git", tag: "0.1.0"}
-  #
-  # Type "mix help deps" for more examples and options.
-  #
-  # Dependencies listed here are available only for this project
-  # and cannot be accessed from applications inside the apps folder
+  defp releases do
+    [
+      game: [
+        applications: [
+          mj: :permanent,
+          mj_web: :permanent,
+          runtime_tools: :permanent
+        ],
+        include_executables_for: [:unix]
+      ]
+    ]
+  end
+
   defp deps do
     []
   end
