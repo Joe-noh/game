@@ -16,6 +16,7 @@ defmodule Mj.GameServer do
   end
 
   def init(id) do
+    Process.flag(:trap_exit, true)
     {:ok, %{id: id}}
   end
 
@@ -23,7 +24,12 @@ defmodule Mj.GameServer do
     {:reply, "hello from #{inspect(id)}, #{inspect(self())}", state}
   end
 
+  def terminate(_reason, state = %{id: id}) do
+    Logger.info("id: #{id} terminating. state: #{inspect state}")
+    :ok
+  end
+
   defp via_tuple(id) do
-    {:via, Registry, {Mj.GameRegistry, id}}
+    {:via, Horde.Registry, {Mj.GameRegistry, id}}
   end
 end
