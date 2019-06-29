@@ -13,6 +13,18 @@ config :mj_web, MjWeb.Endpoint,
   url: [host: "example.com", port: 80],
   cache_static_manifest: "priv/static/cache_manifest.json"
 
+config :libcluster,
+  topologies: [
+    kubernetes: [
+      strategy: Elixir.Cluster.Strategy.Kubernetes.DNS,
+      config: [
+        service: "mj-headless",
+        application_name: "mj",
+        polling_interval: 10_000
+      ]
+    ]
+  ]
+
 # ## SSL Support
 #
 # To get SSL working, you will need to add the `https` key

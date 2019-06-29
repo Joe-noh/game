@@ -1,0 +1,30 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mj
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: mj
+    spec:
+      containers:
+        - name: mj
+          image: mj:local
+          imagePullPolicy: Never
+          env:
+            - name: RELEASE_COOKIE
+              value: "thisiscookie"
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: RELEASE_NODE
+              value: "mj@$(POD_IP)"
+            - name: RELEASE_DISTRIBUTION
+              value: "name"
+            - name: SECRET_KEY_BASE
+              value: "loremipsum"
+            - name: DATABASE_URL
+              value: "postgres://postgres:postgres@localhost:5432"

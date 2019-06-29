@@ -30,6 +30,11 @@ config :mj_web, MjWeb.Endpoint,
     ]
   ]
 
+config :libcluster,
+  topologies: [
+    local: [strategy: Mj.Cluster.LocalStrategy]
+  ]
+
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed
