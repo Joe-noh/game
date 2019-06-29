@@ -25,7 +25,7 @@ defmodule Mj.GameServer do
   end
 
   def terminate(_reason, state = %{id: id}) do
-    Logger.info("id: #{id} terminating. state: #{inspect state}")
+    Logger.info("id: #{id} terminating. state: #{inspect(state)}")
     :ok
   end
 

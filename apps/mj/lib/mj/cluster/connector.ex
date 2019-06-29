@@ -20,7 +20,7 @@ defmodule Mj.Cluster.Connector do
   defp set_cluster_members(names) do
     Enum.each(names, fn name ->
       me = {name, Node.self()}
-      others = Node.list() |> Enum.map(& {name, &1})
+      others = Node.list() |> Enum.map(&{name, &1})
 
       Horde.Cluster.set_members(me, [me | others])
     end)
