@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 # For production, don't forget to configure the url host
 # to something meaningful, Phoenix uses this information
@@ -12,6 +12,18 @@ use Mix.Config
 config :mj_web, MjWeb.Endpoint,
   url: [host: "example.com", port: 80],
   cache_static_manifest: "priv/static/cache_manifest.json"
+
+config :libcluster,
+  topologies: [
+    kubernetes: [
+      strategy: Elixir.Cluster.Strategy.Kubernetes.DNS,
+      config: [
+        service: "mj-headless",
+        application_name: "mj",
+        polling_interval: 10_000
+      ]
+    ]
+  ]
 
 # ## SSL Support
 #
@@ -62,4 +74,4 @@ config :logger, level: :info
 
 # Finally import the config/prod.secret.exs which loads secrets
 # and configuration from environment variables.
-import_config "prod.secret.exs"
+# import_config "prod.secret.exs"

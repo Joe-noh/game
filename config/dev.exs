@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 # Configure your database
 config :mj, Mj.Repo,
@@ -28,6 +28,11 @@ config :mj_web, MjWeb.Endpoint,
       "--watch-stdin",
       cd: Path.expand("../apps/mj_web/assets", __DIR__)
     ]
+  ]
+
+config :libcluster,
+  topologies: [
+    local: [strategy: Mj.Cluster.LocalStrategy]
   ]
 
 # ## SSL Support

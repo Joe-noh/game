@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 # Configure your database
 config :mj, Mj.Repo,
@@ -13,6 +13,9 @@ config :mj, Mj.Repo,
 config :mj_web, MjWeb.Endpoint,
   http: [port: 4002],
   server: false
+
+config :libcluster,
+  topologies: []
 
 # Print only warnings and errors during test
 config :logger, level: :warn
