@@ -1,30 +1,49 @@
-defmodule Mj.Umbrella.MixProject do
+defmodule Mj.MixProject do
   use Mix.Project
 
   def project do
     [
-      version: "0.0.1",
-      apps_path: "apps",
+      app: :mj,
+      version: "0.1.0",
+      elixir: "~> 1.5",
+      elixirc_paths: elixirc_paths(Mix.env()),
+      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
-      deps: deps(),
-      releases: releases()
+      aliases: aliases(),
+      deps: deps()
     ]
   end
 
-  defp releases do
+  def application do
     [
-      game: [
-        applications: [
-          mj: :permanent,
-          mj_web: :permanent,
-          runtime_tools: :permanent
-        ],
-        include_executables_for: [:unix]
-      ]
+      mod: {Mj.Application, []},
+      extra_applications: [:logger, :runtime_tools]
     ]
   end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
 
   defp deps do
-    []
+    [
+      {:phoenix, "~> 1.4.7"},
+      {:phoenix_pubsub, "~> 1.1"},
+      {:phoenix_ecto, "~> 4.0"},
+      {:ecto_sql, "~> 3.0"},
+      {:postgrex, ">= 0.0.0"},
+      {:gettext, "~> 0.11"},
+      {:jason, "~> 1.0"},
+      {:plug_cowboy, "~> 2.0"},
+      {:horde, "~> 0.6"},
+      {:libcluster, "~> 3.1"}
+    ]
+  end
+
+  defp aliases do
+    [
+      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+      "ecto.reset": ["ecto.drop", "ecto.setup"],
+      test: ["ecto.create --quiet", "ecto.migrate", "test"]
+    ]
   end
 end
