@@ -14,17 +14,26 @@ spec:
           image: mj:local
           imagePullPolicy: Never
           env:
-            - name: RELEASE_COOKIE
-              value: "thisiscookie"
             - name: POD_IP
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
+            - name: RELEASE_COOKIE
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: releaseCookie
             - name: RELEASE_NODE
               value: "mj@$(POD_IP)"
             - name: RELEASE_DISTRIBUTION
               value: "name"
             - name: SECRET_KEY_BASE
-              value: "loremipsum"
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: secretKeyBase
             - name: DATABASE_URL
-              value: "postgres://postgres:postgres@localhost:5432"
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: databaseUrl
