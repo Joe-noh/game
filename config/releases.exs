@@ -14,5 +14,4 @@ config :mj, MjWeb.Endpoint,
   http: [:inet6, port: String.to_integer(System.get_env("PORT", "4000"))],
   secret_key_base: System.fetch_env!("SECRET_KEY_BASE")
 
-config :mj, MjWeb.Guardian,
-  secret_key: System.fetch_env!("JWT_SECRET_KEY")
+config :mj, MjWeb.Guardian, secret_key: System.fetch_env!("JWT_SECRET_KEY")
