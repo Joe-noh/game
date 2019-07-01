@@ -9,6 +9,10 @@ config :mj, MjWeb.Endpoint,
   render_errors: [view: MjWeb.ErrorView, accepts: ~w(json)],
   pubsub: [name: Mj.PubSub, adapter: Phoenix.PubSub.PG2]
 
+config :mj, MjWeb.Guardian,
+  issuer: "mj",
+  secret_key: "6x7/p/jsoEGWZ4Cu6TLaAB2MopJtKtP78vwwty7kXWMmVjgSe2kYupAy1cYskG3k"
+
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]

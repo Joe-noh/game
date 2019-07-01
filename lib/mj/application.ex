@@ -7,7 +7,7 @@ defmodule Mj.Application do
     topologies = Application.get_env(:libcluster, :topologies)
 
     children = [
-      # Mj.Repo,
+      Mj.Repo,
       MjWeb.Endpoint,
       {Horde.Supervisor, name: Mj.GameSupervisor, strategy: :one_for_one},
       {Horde.Registry, name: Mj.GameRegistry, keys: :unique},
