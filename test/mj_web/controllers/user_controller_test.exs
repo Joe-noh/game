@@ -1,8 +1,22 @@
 defmodule MjWeb.UserControllerTest do
   use MjWeb.ConnCase, async: true
 
-  setup %{conn: conn} do
-    {:ok, conn: put_req_header(conn, "accept", "application/json")}
+  describe "show user" do
+    setup %{conn: conn} do
+      {:ok, user} = Mj.Identities.create_user(%{name: "john"})
+      {:ok, conn} = TestHelpers.login(conn, user)
+
+      %{conn: conn, user: user}
+    end
+
+    test "renders user", %{conn: conn, user: user} do
+      json =
+        conn
+        |> get(Routes.user_path(conn, :show, user))
+        |> json_response(200)
+
+      assert %{"name" => "john"} = json["data"]
+    end
   end
 
   describe "create user" do

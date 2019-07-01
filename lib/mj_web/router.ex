@@ -17,6 +17,8 @@ defmodule MjWeb.Router do
 
   scope "/api", MjWeb do
     pipe_through [:auth, :api]
+
+    resources "/users", UserController, only: [:show]
   end
 
   scope "/api", MjWeb do
