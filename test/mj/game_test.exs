@@ -26,13 +26,13 @@ defmodule Mj.GameTest do
     end
 
     test "can add four distinct players", %{game_id: game_id} do
-      assert :ok = Mj.Game.add_player(game_id, "player1")
-      assert :ok = Mj.Game.add_player(game_id, "player2")
+      assert {:ok, 1} = Mj.Game.add_player(game_id, "player1")
+      assert {:ok, 2} = Mj.Game.add_player(game_id, "player2")
 
       assert {:error, :already_joined} = Mj.Game.add_player(game_id, "player2")
 
-      assert :ok = Mj.Game.add_player(game_id, "player3")
-      assert :ok = Mj.Game.add_player(game_id, "player4")
+      assert {:ok, 3} = Mj.Game.add_player(game_id, "player3")
+      assert {:ok, 4} = Mj.Game.add_player(game_id, "player4")
 
       assert {:error, :full} = Mj.Game.add_player(game_id, "player5")
     end

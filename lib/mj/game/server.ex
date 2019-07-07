@@ -34,7 +34,8 @@ defmodule Mj.Game.Server do
     if player_id in players do
       {:reply, {:error, :already_joined}, state}
     else
-      {:reply, :ok, %State{state | players: [player_id | players]}}
+      new_players = [player_id | players]
+      {:reply, {:ok, length(new_players)}, %State{state | players: new_players}}
     end
   end
 
