@@ -8,6 +8,7 @@ defmodule MjWeb.UserSocket do
     case MjWeb.Guardian.decode_and_verify(token) do
       {:ok, %{"sub" => user_id}} ->
         {:ok, assign(socket, :user_id, user_id)}
+
       _error ->
         :error
     end

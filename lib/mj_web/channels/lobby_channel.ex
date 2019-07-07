@@ -16,6 +16,7 @@ defmodule MjWeb.LobbyChannel do
     case Mj.Matching.Server.start_or_join(player_id) do
       {:ok, game_id} ->
         {:reply, {:ok, %{game_id: game_id}}, socket}
+
       :error ->
         {:reply, :error, socket}
     end

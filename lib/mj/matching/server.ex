@@ -39,11 +39,14 @@ defmodule Mj.Matching.Server do
     case Mj.Game.add_player(game_id, player_id) do
       {:error, :full} ->
         {:reply, :error, %State{state | unstarted_games: rest}}
+
       {:error, :already_joined} ->
         {:reply, :error, state}
+
       {:ok, 4} ->
         Process.demonitor(ref)
         {:reply, {:ok, game_id}, state}
+
       {:ok, _players_count} ->
         {:reply, {:ok, game_id}, state}
     end
