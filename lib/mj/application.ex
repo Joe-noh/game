@@ -9,6 +9,7 @@ defmodule Mj.Application do
     children = [
       Mj.Repo,
       MjWeb.Endpoint,
+      MjWeb.Presence,
       {Horde.Supervisor, name: Mj.GameSupervisor, strategy: :one_for_one},
       {Horde.Registry, name: Mj.GameRegistry, keys: :unique},
       {Cluster.Supervisor, [topologies, [name: Mj.ClusterSupervisor]]},
