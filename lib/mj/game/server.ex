@@ -2,13 +2,18 @@ defmodule Mj.Game.Server do
   use GenServer
   require Logger
 
-  alias Mj.Game.State
+  defmodule State do
+    defstruct id: nil,
+              players: []
+
+    def new(id) do
+      %__MODULE__{id: id}
+    end
+  end
 
   def child_spec(id) do
     %{id: id, start: {__MODULE__, :start_link, [id]}}
   end
-
-  # API
 
   def start_link(id) do
     Logger.info("Starting Game.Server (id: #{id})")
@@ -18,8 +23,6 @@ defmodule Mj.Game.Server do
   def add_player(id, player_id) do
     GenServer.call(via_tuple(id), {:add_player, player_id})
   end
-
-  # Callbacks
 
   def init(id) do
     Process.flag(:trap_exit, true)
