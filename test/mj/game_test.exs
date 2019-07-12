@@ -3,24 +3,14 @@ defmodule Mj.GameTest do
 
   describe "spawn_new_game/1" do
     test "can start new game" do
-      game_id = Mj.Game.generate_id()
-
-      assert {:ok, pid} = Mj.Game.spawn_new_game(game_id)
+      assert {:ok, pid, _game_id} = Mj.Game.spawn_new_game()
       assert Process.alive?(pid)
-    end
-
-    test "cannot start with same id twice" do
-      game_id = Mj.Game.generate_id()
-
-      assert {:ok, pid} = Mj.Game.spawn_new_game(game_id)
-      assert {:error, _} = Mj.Game.spawn_new_game(game_id)
     end
   end
 
   describe "add_player/2" do
     setup do
-      game_id = Mj.Game.generate_id()
-      {:ok, _pid} = Mj.Game.spawn_new_game(game_id)
+      {:ok, _pid, game_id} = Mj.Game.spawn_new_game()
 
       %{game_id: game_id}
     end
