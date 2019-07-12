@@ -25,7 +25,7 @@ defmodule Mj.Matching.Server do
 
   def handle_call({:start_or_join, player_id}, _from, state = %{unstarted_games: []}) do
     game_id = Mj.Game.generate_id()
-    {:ok, pid} = Mj.Game.start_new_game(game_id)
+    {:ok, pid} = Mj.Game.spawn_new_game(game_id)
     Mj.Game.add_player(game_id, player_id)
 
     ref = Process.monitor(pid)
@@ -44,6 +44,7 @@ defmodule Mj.Matching.Server do
         {:reply, :error, state}
 
       {:ok, 4} ->
+        Mj.Game.start_game(game_id)
         Process.demonitor(ref)
         {:reply, {:ok, game_id}, state}
 

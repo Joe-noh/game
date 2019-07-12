@@ -7,11 +7,15 @@ defmodule Mj.Game do
     UUID.uuid4()
   end
 
-  def start_new_game(game_id) do
+  def spawn_new_game(game_id) do
     Horde.Supervisor.start_child(Mj.GameSupervisor, {Mj.Game.Server, game_id})
   end
 
   def add_player(game_id, player_id) do
     Mj.Game.Server.add_player(game_id, player_id)
+  end
+
+  def start_game(game_id) do
+    Mj.Game.Server.start_game(game_id)
   end
 end

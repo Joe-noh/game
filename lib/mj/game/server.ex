@@ -24,6 +24,10 @@ defmodule Mj.Game.Server do
     GenServer.call(via_tuple(id), {:add_player, player_id})
   end
 
+  def start_game(id) do
+    GenServer.call(via_tuple(id), :start_game)
+  end
+
   def init(id) do
     Process.flag(:trap_exit, true)
     {:ok, State.new(id)}
@@ -40,6 +44,14 @@ defmodule Mj.Game.Server do
       new_players = [player_id | players]
       {:reply, {:ok, length(new_players)}, %State{state | players: new_players}}
     end
+  end
+
+  def handle_call(:start_game, _from, state = %{players: players}) do
+    Enum.each(players, fn player ->
+      MjWeb.Endpoint.broadcast!("user:#{player}", "game:start", %{players: players})
+    end)
+
+    {:reply, :ok, state}
   end
 
   def terminate(_reason, state = %{id: id}) do

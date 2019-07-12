@@ -10,7 +10,7 @@ defmodule MjWeb.LobbyChannel do
     {:ok, socket}
   end
 
-  def handle_in("start_or_join", _, socket) do
+  def handle_in("matching:start_or_join", _, socket) do
     player_id = socket.assigns.user_id
 
     case Mj.Matching.Server.start_or_join(player_id) do
