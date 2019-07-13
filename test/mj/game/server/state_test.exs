@@ -32,12 +32,13 @@ defmodule Mj.Game.Server.StateTest do
         assert length(hand.closed) == 13
       end)
 
-      all_tiles = List.flatten([
-        state.yamahai,
-        state.rinshanhai,
-        state.wanpai,
-        Enum.map(state.tehai, fn {_, %{closed: closed}} -> closed end)
-      ])
+      all_tiles =
+        List.flatten([
+          state.yamahai,
+          state.rinshanhai,
+          state.wanpai,
+          Enum.map(state.tehai, fn {_, %{closed: closed}} -> closed end)
+        ])
 
       assert length(all_tiles) == 136
       assert length(all_tiles) == length(Enum.dedup(all_tiles))
