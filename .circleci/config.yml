@@ -46,4 +46,4 @@ jobs:
       - run: mix test
 
       - store_test_results:
-        path: _build/test/lib/mj
+          path: _build/test/lib/mj
