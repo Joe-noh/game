@@ -27,6 +27,7 @@ defmodule Mj.MixProject do
   defp deps do
     [
       {:ecto_sql, "~> 3.0"},
+      {:elixir_uuid, "~> 1.2"},
       {:gettext, "~> 0.11"},
       {:guardian, "~> 1.2"},
       {:horde, "~> 0.6"},
