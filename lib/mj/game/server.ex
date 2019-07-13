@@ -9,7 +9,7 @@ defmodule Mj.Game.Server do
               round: 1,
               chicha: nil,
               tsumo_player: nil,
-              tehai: %{},
+              hai: %{},
               yamahai: [],
               rinshanhai: [],
               wanpai: []
@@ -33,12 +33,12 @@ defmodule Mj.Game.Server do
       {rinshanhai, tiles} = Enum.split(tiles, 4)
       {wanpai, tiles} = Enum.split(tiles, 10)
 
-      hands = Enum.chunk_every(tiles, 13) |> Enum.map(&%{closed: Enum.sort(&1), open: [], kawa: []})
-      tehai = state.players |> Enum.zip(hands) |> Enum.into(%{})
+      hands = Enum.chunk_every(tiles, 13) |> Enum.map(&%{tehai: &1, furo: [], sutehai: []})
+      hai = state.players |> Enum.zip(hands) |> Enum.into(%{})
 
       chicha = Enum.random(state.players)
 
-      %__MODULE__{state | chicha: chicha, tsumo_player: chicha, tehai: tehai, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai}
+      %__MODULE__{state | chicha: chicha, tsumo_player: chicha, hai: hai, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai}
     end
   end
 
