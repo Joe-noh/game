@@ -1,24 +1,24 @@
-defmodule Mj.Game.Server.StateTest do
+defmodule Mj.Game.Server.GameGameStateTest do
   use ExUnit.Case, async: true
 
-  alias Mj.Game.Server.State
+  alias Mj.Game.Server.GameState
 
   describe "haipai/1" do
     setup do
-      state = State.new("game-id")
-      state = %State{state | players: ~w[p1 p2 p3 p4]}
+      state = GameState.new("game-id")
+      state = %GameState{state | players: ~w[p1 p2 p3 p4]}
 
       %{state: state}
     end
 
     test "returns error tuple without four players", %{state: state} do
-      state = %State{state | players: Enum.slice(state.players, 0..2)}
+      state = %GameState{state | players: Enum.slice(state.players, 0..2)}
 
-      assert {:error, _} = State.haipai(state)
+      assert {:error, _} = GameState.haipai(state)
     end
 
     test "setup tiles", %{state: state} do
-      {:ok, state} = State.haipai(state)
+      {:ok, state} = GameState.haipai(state)
 
       assert state.chicha in state.players
       assert state.chicha == state.tsumo_player

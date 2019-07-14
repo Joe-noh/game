@@ -1,7 +1,7 @@
 defmodule Mj.Game.Server do
   require Logger
 
-  defmodule State do
+  defmodule GameState do
     defstruct id: nil,
               players: [],
               honba: 0,
@@ -17,20 +17,20 @@ defmodule Mj.Game.Server do
       %__MODULE__{id: id}
     end
 
-    def haipai(state) do
-      if length(Enum.dedup(state.players)) == 4 do
-        {:ok, do_haipai(state)}
+    def haipai(game) do
+      if length(Enum.dedup(game.players)) == 4 do
+        {:ok, do_haipai(game)}
       else
         {:error, :not_enough_players}
       end
     end
 
-    defp do_haipai(state = %__MODULE__{players: players}) do
+    defp do_haipai(game = %__MODULE__{players: players}) do
       %{chicha: chicha, tehai: tehai, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai} = Mj.Mahjong.haipai(players, %{})
       hands = Enum.map(tehai, &%{tehai: &1, furo: [], sutehai: []})
-      hai = state.players |> Enum.zip(hands) |> Enum.into(%{})
+      hai = game.players |> Enum.zip(hands) |> Enum.into(%{})
 
-      %__MODULE__{state | chicha: chicha, tsumo_player: chicha, hai: hai, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai}
+      %__MODULE__{game | chicha: chicha, tsumo_player: chicha, hai: hai, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai}
     end
   end
 
@@ -49,43 +49,43 @@ defmodule Mj.Game.Server do
 
   def init(id) do
     Process.flag(:trap_exit, true)
-    {:ok, :wait_for_players, State.new(id)}
+    {:ok, :wait_for_players, GameState.new(id)}
   end
 
   def callback_mode do
     :state_functions
   end
 
-  def wait_for_players({:call, from}, {:add_player, player_id}, state = %{players: players}) do
+  def wait_for_players({:call, from}, {:add_player, player_id}, game = %{players: players}) do
     if player_id in players do
       {:keep_state_and_data, {:reply, from, {:error, :already_joined}}}
     else
-      new_state = %State{state | players: [player_id | players]}
+      game = %GameState{game | players: [player_id | players]}
 
-      if length(new_state.players) == 4 do
-        {:keep_state, new_state, [{:reply, from, {:ok, :start_game}}, {:next_event, :internal, :start_game}]}
+      if length(game.players) == 4 do
+        {:keep_state, game, [{:reply, from, {:ok, :start_game}}, {:next_event, :internal, :start_game}]}
       else
-        {:keep_state, new_state, {:reply, from, {:ok, :waiting}}}
+        {:keep_state, game, {:reply, from, {:ok, :waiting}}}
       end
     end
   end
 
-  def wait_for_players(:internal, :start_game, state = %{players: players}) do
+  def wait_for_players(:internal, :start_game, game = %{players: players}) do
     Enum.each(players, fn player ->
       MjWeb.Endpoint.broadcast!("user:#{player}", "game:start", %{players: players})
     end)
 
-    {:ok, state} = State.haipai(state)
+    {:ok, game} = GameState.haipai(game)
 
-    {:next_state, :wait_for_players_ready, state}
+    {:next_state, :wait_for_players_ready, game}
   end
 
-  def wait_for_players_ready({:call, from}, {:add_player, _}, _state) do
+  def wait_for_players_ready({:call, from}, {:add_player, _}, _game) do
     {:keep_state_and_data, {:reply, from, {:error, :full}}}
   end
 
-  def terminate(_reason, state = %{id: id}) do
-    Logger.info("id: #{id} terminating. state: #{inspect(state)}")
+  def terminate(_reason, game = %{id: id}) do
+    Logger.info("id: #{id} terminating. game: #{inspect(game)}")
     :ok
   end
 
