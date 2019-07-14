@@ -26,17 +26,10 @@ defmodule Mj.Game.Server do
       end
     end
 
-    defp do_haipai(state) do
-      tiles = Mj.Mahjong.all_tile_ids() |> Enum.shuffle()
-
-      {yamahai, tiles} = Enum.split(tiles, 70)
-      {rinshanhai, tiles} = Enum.split(tiles, 4)
-      {wanpai, tiles} = Enum.split(tiles, 10)
-
-      hands = Enum.chunk_every(tiles, 13) |> Enum.map(&%{tehai: &1, furo: [], sutehai: []})
+    defp do_haipai(state = %__MODULE__{players: players}) do
+      %{chicha: chicha, tehai: tehai, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai} = Mj.Mahjong.haipai(players, %{})
+      hands = Enum.map(tehai, &%{tehai: &1, furo: [], sutehai: []})
       hai = state.players |> Enum.zip(hands) |> Enum.into(%{})
-
-      chicha = Enum.random(state.players)
 
       %__MODULE__{state | chicha: chicha, tsumo_player: chicha, hai: hai, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai}
     end
