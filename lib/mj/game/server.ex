@@ -4,10 +4,34 @@ defmodule Mj.Game.Server do
 
   defmodule State do
     defstruct id: nil,
-              players: []
+              players: [],
+              honba: 0,
+              round: 1,
+              chicha: nil,
+              tsumo_player: nil,
+              hai: %{},
+              yamahai: [],
+              rinshanhai: [],
+              wanpai: []
 
     def new(id) do
       %__MODULE__{id: id}
+    end
+
+    def haipai(state) do
+      if length(Enum.dedup(state.players)) == 4 do
+        {:ok, do_haipai(state)}
+      else
+        {:error, :not_enough_players}
+      end
+    end
+
+    defp do_haipai(state = %__MODULE__{players: players}) do
+      %{chicha: chicha, tehai: tehai, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai} = Mj.Mahjong.haipai(players, %{})
+      hands = Enum.map(tehai, &%{tehai: &1, furo: [], sutehai: []})
+      hai = state.players |> Enum.zip(hands) |> Enum.into(%{})
+
+      %__MODULE__{state | chicha: chicha, tsumo_player: chicha, hai: hai, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai}
     end
   end
 
@@ -50,6 +74,8 @@ defmodule Mj.Game.Server do
     Enum.each(players, fn player ->
       MjWeb.Endpoint.broadcast!("user:#{player}", "game:start", %{players: players})
     end)
+
+    {:ok, state} = State.haipai(state)
 
     {:reply, :ok, state}
   end
