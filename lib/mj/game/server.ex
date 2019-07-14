@@ -1,5 +1,4 @@
 defmodule Mj.Game.Server do
-  use GenServer
   require Logger
 
   defmodule State do
@@ -41,43 +40,51 @@ defmodule Mj.Game.Server do
 
   def start_link(id) do
     Logger.info("Starting Game.Server (id: #{id})")
-    GenServer.start_link(__MODULE__, id, name: via_tuple(id))
+    :gen_statem.start_link(via_tuple(id), __MODULE__, id, [])
   end
 
   def add_player(id, player_id) do
-    GenServer.call(via_tuple(id), {:add_player, player_id})
+    :gen_statem.call(via_tuple(id), {:add_player, player_id})
   end
 
   def start_game(id) do
-    GenServer.call(via_tuple(id), :start_game)
+    :gen_statem.call(via_tuple(id), :start_game)
   end
 
   def init(id) do
     Process.flag(:trap_exit, true)
-    {:ok, State.new(id)}
+    {:ok, :wait_for_players, State.new(id)}
   end
 
-  def handle_call({:add_player, _}, _from, state = %{players: players}) when length(players) >= 4 do
-    {:reply, {:error, :full}, state}
+  def callback_mode do
+    :state_functions
   end
 
-  def handle_call({:add_player, player_id}, _from, state = %{players: players}) do
+  def wait_for_players({:call, from}, {:add_player, _}, %{players: players}) when length(players) >= 4 do
+    {:keep_state_and_data, {:reply, from, {:error, :full}}}
+  end
+
+  def wait_for_players({:call, from}, {:add_player, player_id}, state = %{players: players}) do
     if player_id in players do
-      {:reply, {:error, :already_joined}, state}
+      {:keep_state_and_data, {:reply, from, {:error, :already_joined}}}
     else
       new_players = [player_id | players]
-      {:reply, {:ok, length(new_players)}, %State{state | players: new_players}}
+      {:keep_state, %State{state | players: new_players}, {:reply, from, {:ok, length(new_players)}}}
     end
   end
 
-  def handle_call(:start_game, _from, state = %{players: players}) do
+  def wait_for_players({:call, from}, :start_game, state = %{players: players}) do
     Enum.each(players, fn player ->
       MjWeb.Endpoint.broadcast!("user:#{player}", "game:start", %{players: players})
     end)
 
     {:ok, state} = State.haipai(state)
 
-    {:reply, :ok, state}
+    {:next_state, :start_game, state, {:reply, from, :ok}}
+  end
+
+  def start_game({:call, _from}, _, state) do
+    {:keep_state, state}
   end
 
   def terminate(_reason, state = %{id: id}) do
