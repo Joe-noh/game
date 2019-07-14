@@ -38,6 +38,10 @@ defmodule Mj.Game.Server do
     %{id: id, start: {__MODULE__, :start_link, [id]}}
   end
 
+  def callback_mode do
+    :state_functions
+  end
+
   def start_link(id) do
     Logger.info("Starting Game.Server (id: #{id})")
     :gen_statem.start_link(via_tuple(id), __MODULE__, id, [])
@@ -50,10 +54,6 @@ defmodule Mj.Game.Server do
   def init(id) do
     Process.flag(:trap_exit, true)
     {:ok, :wait_for_players, GameState.new(id)}
-  end
-
-  def callback_mode do
-    :state_functions
   end
 
   def wait_for_players({:call, from}, {:add_player, player_id}, game = %{players: players}) do
@@ -84,8 +84,8 @@ defmodule Mj.Game.Server do
     {:keep_state_and_data, {:reply, from, {:error, :full}}}
   end
 
-  def terminate(_reason, game = %{id: id}) do
-    Logger.info("id: #{id} terminating. game: #{inspect(game)}")
+  def terminate(_reason, state, game = %{id: id}) do
+    Logger.info("id: #{id} terminating. state: #{inspect(state)}, game: #{inspect(game)}")
     :ok
   end
 
