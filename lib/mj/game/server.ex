@@ -47,10 +47,6 @@ defmodule Mj.Game.Server do
     :gen_statem.call(via_tuple(id), {:add_player, player_id})
   end
 
-  def start_game(id) do
-    :gen_statem.call(via_tuple(id), :start_game)
-  end
-
   def init(id) do
     Process.flag(:trap_exit, true)
     {:ok, :wait_for_players, State.new(id)}
@@ -60,31 +56,32 @@ defmodule Mj.Game.Server do
     :state_functions
   end
 
-  def wait_for_players({:call, from}, {:add_player, _}, %{players: players}) when length(players) >= 4 do
-    {:keep_state_and_data, {:reply, from, {:error, :full}}}
-  end
-
   def wait_for_players({:call, from}, {:add_player, player_id}, state = %{players: players}) do
     if player_id in players do
       {:keep_state_and_data, {:reply, from, {:error, :already_joined}}}
     else
-      new_players = [player_id | players]
-      {:keep_state, %State{state | players: new_players}, {:reply, from, {:ok, length(new_players)}}}
+      new_state = %State{state | players: [player_id | players]}
+
+      if length(new_state.players) == 4 do
+        {:keep_state, new_state, [{:reply, from, {:ok, 4}}, {:next_event, :internal, :start_game}]}
+      else
+        {:keep_state, new_state, {:reply, from, {:ok, length(new_state.players)}}}
+      end
     end
   end
 
-  def wait_for_players({:call, from}, :start_game, state = %{players: players}) do
+  def wait_for_players(:internal, :start_game, state = %{players: players}) do
     Enum.each(players, fn player ->
       MjWeb.Endpoint.broadcast!("user:#{player}", "game:start", %{players: players})
     end)
 
     {:ok, state} = State.haipai(state)
 
-    {:next_state, :start_game, state, {:reply, from, :ok}}
+    {:next_state, :wait_for_players_ready, state}
   end
 
-  def start_game({:call, _from}, _, state) do
-    {:keep_state, state}
+  def wait_for_players_ready({:call, from}, {:add_player, _}, _state) do
+    {:keep_state_and_data, {:reply, from, {:error, :full}}}
   end
 
   def terminate(_reason, state = %{id: id}) do

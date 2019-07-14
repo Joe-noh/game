@@ -43,7 +43,6 @@ defmodule Mj.Matching.Server do
         {:reply, :error, state}
 
       {:ok, 4} ->
-        Mj.Game.start_game(game_id)
         Process.demonitor(ref)
         {:reply, {:ok, game_id}, state}
 

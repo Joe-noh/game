@@ -11,5 +11,4 @@ defmodule Mj.Game do
   end
 
   defdelegate add_player(game_id, player_id), to: Mj.Game.Server
-  defdelegate start_game(game_id), to: Mj.Game.Server
 end
