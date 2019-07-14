@@ -63,9 +63,9 @@ defmodule Mj.Game.Server do
       new_state = %State{state | players: [player_id | players]}
 
       if length(new_state.players) == 4 do
-        {:keep_state, new_state, [{:reply, from, {:ok, 4}}, {:next_event, :internal, :start_game}]}
+        {:keep_state, new_state, [{:reply, from, {:ok, :start_game}}, {:next_event, :internal, :start_game}]}
       else
-        {:keep_state, new_state, {:reply, from, {:ok, length(new_state.players)}}}
+        {:keep_state, new_state, {:reply, from, {:ok, :waiting}}}
       end
     end
   end
