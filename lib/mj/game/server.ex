@@ -6,7 +6,8 @@ defmodule Mj.Game.Server do
               players: [],
               honba: 0,
               round: 1,
-              tsumo_player: 0,
+              tsumo_player_index: 0,
+              tsumohai: nil,
               hands: %{},
               yamahai: [],
               rinshanhai: [],
@@ -28,6 +29,12 @@ defmodule Mj.Game.Server do
       %{players: players, hands: hands, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai} = Mj.Mahjong.haipai(players, %{})
 
       %__MODULE__{game | players: players, hands: hands, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai}
+    end
+
+    def tsumo(game) do
+      [tsumohai | yamahai] = game.yamahai
+
+      {:ok, %__MODULE__{game | tsumohai: tsumohai, yamahai: yamahai}}
     end
   end
 
@@ -75,10 +82,23 @@ defmodule Mj.Game.Server do
       MjWeb.GameEventPusher.game_start(player, %{players: players, hand: hand})
     end)
 
-    {:next_state, :wait_for_players_ready, game}
+    {:next_state, :tsumoban, game, {:next_event, :internal, :tsumo}}
   end
 
-  def wait_for_players_ready({:call, from}, {:add_player, _}, _game) do
+  def tsumoban(:internal, :tsumo, game = %{players: players, tsumo_player_index: tsumo_player_index}) do
+    {tsumo_player, other_players} = List.pop_at(players, tsumo_player_index)
+    {:ok, game = %{tsumohai: tsumohai, yamahai: _yamahai}} = GameState.tsumo(game)
+
+    MjWeb.GameEventPusher.tsumo(tsumo_player, %{tsumohai: tsumohai, other_players: other_players})
+
+    {:next_state, :wait_for_dahai, game}
+  end
+
+  def tsumoban({:call, from}, {:add_player, _}, _game) do
+    {:keep_state_and_data, {:reply, from, {:error, :full}}}
+  end
+
+  def wait_for_dahai({:call, from}, {:add_player, _}, _game) do
     {:keep_state_and_data, {:reply, from, {:error, :full}}}
   end
 
