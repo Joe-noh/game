@@ -25,7 +25,7 @@ defmodule Mj.Game.Server.GameGameStateTest do
       assert length(state.rinshanhai) == 4
       assert length(state.wanpai) == 10
 
-      Enum.each(state.hai, fn {_player, hand} ->
+      Enum.each(state.hands, fn {_player, hand} ->
         assert hand.sutehai == []
         assert hand.furo == []
         assert length(hand.tehai) == 13
@@ -36,7 +36,7 @@ defmodule Mj.Game.Server.GameGameStateTest do
           state.yamahai,
           state.rinshanhai,
           state.wanpai,
-          Enum.map(state.hai, fn {_, %{tehai: tehai}} -> tehai end)
+          Enum.map(state.hands, fn {_, %{tehai: tehai}} -> tehai end)
         ])
 
       assert length(all_tiles) == 136
