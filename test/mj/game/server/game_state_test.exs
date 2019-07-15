@@ -20,8 +20,7 @@ defmodule Mj.Game.Server.GameGameStateTest do
     test "setup tiles", %{state: state} do
       {:ok, state} = GameState.haipai(state)
 
-      assert state.chicha in state.players
-      assert state.chicha == state.tsumo_player
+      assert state.tsumo_player == 0
       assert length(state.yamahai) == 70
       assert length(state.rinshanhai) == 4
       assert length(state.wanpai) == 10

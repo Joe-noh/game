@@ -6,8 +6,7 @@ defmodule Mj.Game.Server do
               players: [],
               honba: 0,
               round: 1,
-              chicha: nil,
-              tsumo_player: nil,
+              tsumo_player: 0,
               hai: %{},
               yamahai: [],
               rinshanhai: [],
@@ -26,11 +25,11 @@ defmodule Mj.Game.Server do
     end
 
     defp do_haipai(game = %__MODULE__{players: players}) do
-      %{chicha: chicha, tehai: tehai, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai} = Mj.Mahjong.haipai(players, %{})
+      %{players: players, tehai: tehai, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai} = Mj.Mahjong.haipai(players, %{})
       hands = Enum.map(tehai, &%{tehai: &1, furo: [], sutehai: []})
-      hai = game.players |> Enum.zip(hands) |> Enum.into(%{})
+      hai = players |> Enum.zip(hands) |> Enum.into(%{})
 
-      %__MODULE__{game | chicha: chicha, tsumo_player: chicha, hai: hai, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai}
+      %__MODULE__{game | players: players, hai: hai, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai}
     end
   end
 
@@ -70,12 +69,12 @@ defmodule Mj.Game.Server do
     end
   end
 
-  def wait_for_players(:internal, :start_game, game = %{players: players}) do
+  def wait_for_players(:internal, :start_game, game) do
+    {:ok, game = %{players: players}} = GameState.haipai(game)
+
     Enum.each(players, fn player ->
       MjWeb.GameEventPusher.game_start(player, %{players: players})
     end)
-
-    {:ok, game} = GameState.haipai(game)
 
     {:next_state, :wait_for_players_ready, game}
   end
