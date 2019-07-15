@@ -72,7 +72,7 @@ defmodule Mj.Game.Server do
 
   def wait_for_players(:internal, :start_game, game = %{players: players}) do
     Enum.each(players, fn player ->
-      MjWeb.Endpoint.broadcast!("user:#{player}", "game:start", %{players: players})
+      MjWeb.GameEventPusher.game_start(player, %{players: players})
     end)
 
     {:ok, game} = GameState.haipai(game)
