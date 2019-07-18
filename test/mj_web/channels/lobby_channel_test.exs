@@ -17,7 +17,7 @@ defmodule MjWeb.LobbyChannelTest do
       assert_reply push(socket4, "matching:start_or_join", %{}), :ok, %{game_id: ^game_id}
       refute_reply push(socket5, "matching:start_or_join", %{}), :ok, %{game_id: ^game_id}
 
-      %{topic: "user:" <> id1} = assert_broadcast("game:start", %{players: _})
+      %{topic: "user:" <> id1} = assert_broadcast("game:start", %{players: _, hand: %{tehai: _, furo: [], sutehai: []}})
       %{topic: "user:" <> id2} = assert_broadcast("game:start", %{players: _})
       %{topic: "user:" <> id3} = assert_broadcast("game:start", %{players: _})
       %{topic: "user:" <> id4} = assert_broadcast("game:start", %{players: _})

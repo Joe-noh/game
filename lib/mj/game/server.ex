@@ -6,9 +6,9 @@ defmodule Mj.Game.Server do
               players: [],
               honba: 0,
               round: 1,
-              chicha: nil,
-              tsumo_player: nil,
-              hai: %{},
+              tsumo_player_index: 0,
+              tsumohai: nil,
+              hands: %{},
               yamahai: [],
               rinshanhai: [],
               wanpai: []
@@ -26,11 +26,53 @@ defmodule Mj.Game.Server do
     end
 
     defp do_haipai(game = %__MODULE__{players: players}) do
-      %{chicha: chicha, tehai: tehai, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai} = Mj.Mahjong.haipai(players, %{})
-      hands = Enum.map(tehai, &%{tehai: &1, furo: [], sutehai: []})
-      hai = game.players |> Enum.zip(hands) |> Enum.into(%{})
+      %{players: players, hands: hands, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai} = Mj.Mahjong.haipai(players, %{})
 
-      %__MODULE__{game | chicha: chicha, tsumo_player: chicha, hai: hai, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai}
+      %__MODULE__{game | players: players, hands: hands, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai}
+    end
+
+    def tsumo(game) do
+      [tsumohai | yamahai] = game.yamahai
+
+      {:ok, %__MODULE__{game | tsumohai: tsumohai, yamahai: yamahai}}
+    end
+
+    def tsumogiri(game = %__MODULE__{players: players, hands: hands, tsumo_player_index: tsumo_player_index, tsumohai: tsumohai}, player_id) do
+      if player_id == players[tsumo_player_index] do
+        hands = Map.update!(hands, player_id, fn hand = %{sutehai: sutehai} ->
+          Map.put(hand, :sutehai, [%{hai: tsumohai, tsumogiri: true} | sutehai])
+        end)
+
+        # TODO: check can anyone furo
+
+        next_tsumo_player_index = rem(tsumo_player_index + 1, length(players))
+        game = %GameState{game | tsumohai: nil, tsumo_player_index: next_tsumo_player_index, hands: hands}
+
+        {:ok, game}
+      else
+        {:error, :not_your_turn}
+      end
+    end
+
+    def dahai(game = %__MODULE__{players: players, hands: hands, tsumo_player_index: tsumo_player_index, tsumohai: tsumohai}, player_id, dahai) do
+      if player_id == players[tsumo_player_index] do
+        if dahai in get_in(hands, [player_id, :tehai]) do
+          hands = Map.update!(hands, player_id, fn hand = %{tehai: tehai, sutehai: sutehai} ->
+            hand
+            |> Map.put(:sutehai, [%{hai: dahai, tsumogiri: false} | sutehai])
+            |> Map.put(:tehai, [tsumohai | Enum.reject(tehai, & &1 == dahai)])
+          end)
+
+          next_tsumo_player_index = rem(tsumo_player_index + 1, length(players))
+          game = %GameState{game | tsumohai: nil, tsumo_player_index: next_tsumo_player_index, hands: hands}
+
+          {:ok, game}
+        else
+          {:error, :not_in_your_hand}
+        end
+      else
+        {:error, :not_your_turn}
+      end
     end
   end
 
@@ -49,6 +91,10 @@ defmodule Mj.Game.Server do
 
   def add_player(id, player_id) do
     :gen_statem.call(via_tuple(id), {:add_player, player_id})
+  end
+
+  def dahai(id, player_id, dahai) do
+    :gen_statem.call(via_tuple(id), {:dahai, player_id, dahai})
   end
 
   def init(id) do
@@ -70,18 +116,44 @@ defmodule Mj.Game.Server do
     end
   end
 
-  def wait_for_players(:internal, :start_game, game = %{players: players}) do
+  def wait_for_players(:internal, :start_game, game) do
+    {:ok, game = %{players: players, hands: hands}} = GameState.haipai(game)
+
     Enum.each(players, fn player ->
-      MjWeb.Endpoint.broadcast!("user:#{player}", "game:start", %{players: players})
+      hand = Map.get(hands, player)
+      MjWeb.GameEventPusher.game_start(player, %{players: players, hand: hand})
     end)
 
-    {:ok, game} = GameState.haipai(game)
-
-    {:next_state, :wait_for_players_ready, game}
+    {:next_state, :tsumoban, game, {:next_event, :internal, :tsumo}}
   end
 
-  def wait_for_players_ready({:call, from}, {:add_player, _}, _game) do
+  def tsumoban(:internal, :tsumo, game = %{players: players, tsumo_player_index: tsumo_player_index}) do
+    {tsumo_player, other_players} = List.pop_at(players, tsumo_player_index)
+    {:ok, game = %{tsumohai: tsumohai, yamahai: _yamahai}} = GameState.tsumo(game)
+
+    MjWeb.GameEventPusher.tsumo(tsumo_player, %{tsumohai: tsumohai, other_players: other_players})
+
+    {:next_state, :wait_for_dahai, game}
+  end
+
+  def tsumoban({:call, from}, {:add_player, _}, _game) do
     {:keep_state_and_data, {:reply, from, {:error, :full}}}
+  end
+
+  def wait_for_dahai({:call, from}, {:add_player, _}, _game) do
+    {:keep_state_and_data, {:reply, from, {:error, :full}}}
+  end
+
+  def wait_for_dahai({:call, from}, {:dahai, player_id, dahai}, game = %{tsumohai: dahai}) do
+    {:ok, game} = GameState.tsumogiri(game, player_id)
+
+    {:next_state, :tsumoban, game, [{:reply, from, :ok}, {:next_event, :internal, :tsumo}]}
+  end
+
+  def wait_for_dahai({:call, from}, {:dahai, player_id, dahai}, game) do
+    {:ok, game} = GameState.dahai(game, player_id, dahai)
+
+    {:next_state, :tsumoban, game, [{:reply, from, :ok}, {:next_event, :internal, :tsumo}]}
   end
 
   def terminate(_reason, state, game = %{id: id}) do
