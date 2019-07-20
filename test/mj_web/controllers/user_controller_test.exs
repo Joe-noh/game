@@ -4,7 +4,7 @@ defmodule MjWeb.UserControllerTest do
   describe "show user" do
     setup %{conn: conn} do
       {:ok, user} = Mj.Identities.create_user(%{name: "john"})
-      {:ok, conn} = TestHelpers.login(conn, user)
+      conn = TestHelpers.login(conn, user)
 
       %{conn: conn, user: user}
     end
