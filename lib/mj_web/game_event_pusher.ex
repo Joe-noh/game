@@ -11,6 +11,7 @@ defmodule MjWeb.GameEventPusher do
   @spec tsumo(player_id :: String.t(), payload :: Map.t()) :: no_return()
   def tsumo(player_id, %{tsumohai: tsumohai, other_players: other_players}) do
     push(player_id, "game:tsumo", %{tsumohai: tsumohai})
+
     Enum.each(other_players, fn other ->
       push(other, "game:tacha_tsumo", %{player: player_id})
     end)

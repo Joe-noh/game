@@ -1,7 +1,6 @@
 defmodule MjWeb.UserSocket do
   use Phoenix.Socket
 
-  channel "lobby", MjWeb.LobbyChannel
   channel "game:*", MjWeb.GameChannel
 
   def connect(%{"token" => token}, socket, _connect_info) do
