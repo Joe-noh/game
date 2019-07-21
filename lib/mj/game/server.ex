@@ -108,7 +108,7 @@ defmodule Mj.Game.Server do
       game = %GameState{game | players: [player_id | players]}
 
       if length(game.players) == 4 do
-        {:keep_state, game, [{:reply, from, {:ok, :start_game}}, {:next_event, :internal, :start_game}]}
+        {:keep_state, game, {:reply, from, {:ok, :startable}}}
       else
         {:keep_state, game, {:reply, from, {:ok, :waiting}}}
       end
@@ -119,7 +119,7 @@ defmodule Mj.Game.Server do
     {:keep_state, game, {:reply, from, {:error, :full}}}
   end
 
-  def handle_event(:internal, :start_game, :wait_for_players, game) do
+  def handle_event(:internal, :start_game, :startable, game) do
     {:ok, game = %{players: players, hands: hands}} = GameState.haipai(game)
 
     Enum.each(players, fn player ->

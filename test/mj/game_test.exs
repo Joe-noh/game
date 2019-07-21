@@ -22,7 +22,7 @@ defmodule Mj.GameTest do
       assert {:error, :already_joined} = Mj.Game.add_player(game_id, "player2")
 
       assert {:ok, :waiting} = Mj.Game.add_player(game_id, "player3")
-      assert {:ok, :start_game} = Mj.Game.add_player(game_id, "player4")
+      assert {:ok, :startable} = Mj.Game.add_player(game_id, "player4")
 
       assert {:error, :full} = Mj.Game.add_player(game_id, "player5")
     end
