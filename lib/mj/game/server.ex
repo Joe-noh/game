@@ -1,5 +1,5 @@
 defmodule Mj.Game.Server do
-  use GenStateMachine
+  use GenStateMachine, callback_mode: :handle_event_function
   require Logger
 
   defmodule GameState do
