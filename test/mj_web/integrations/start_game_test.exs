@@ -3,7 +3,7 @@ defmodule MjWeb.StartGameTest do
 
   describe "starting game" do
     test "normal case", %{conn: conn} do
-      {:ok, [p1, p2, p3, p4]} = Fixtures.create_list(:user, 4)
+      {:ok, [p1, p2, p3, p4]} = Fixtures.create(:user, 4)
 
       conn1 = TestHelpers.login(conn, p1)
       conn2 = TestHelpers.login(conn, p2)
