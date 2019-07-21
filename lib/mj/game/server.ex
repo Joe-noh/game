@@ -108,7 +108,7 @@ defmodule Mj.Game.Server do
       game = %GameState{game | players: [player_id | players]}
 
       if length(game.players) == 4 do
-        {:keep_state, game, {:reply, from, {:ok, :startable}}}
+        {:next_state, :startable, game, {:reply, from, {:ok, :startable}}}
       else
         {:keep_state, game, {:reply, from, {:ok, :waiting}}}
       end
