@@ -11,7 +11,8 @@ defmodule Mj.Mahjong do
     {rinshanhai, tiles} = Enum.split(tiles, 4)
     {wanpai, tiles} = Enum.split(tiles, 10)
 
-    players = Enum.shuffle(players) # 席順 (東南西北)
+    # 席順 (東南西北)
+    players = Enum.shuffle(players)
 
     hands =
       Enum.chunk_every(tiles, 13)

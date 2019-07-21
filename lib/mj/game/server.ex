@@ -39,9 +39,10 @@ defmodule Mj.Game.Server do
 
     def tsumogiri(game = %__MODULE__{players: players, hands: hands, tsumo_player_index: tsumo_player_index, tsumohai: tsumohai}, player_id) do
       if player_id == players[tsumo_player_index] do
-        hands = Map.update!(hands, player_id, fn hand = %{sutehai: sutehai} ->
-          Map.put(hand, :sutehai, [%{hai: tsumohai, tsumogiri: true} | sutehai])
-        end)
+        hands =
+          Map.update!(hands, player_id, fn hand = %{sutehai: sutehai} ->
+            Map.put(hand, :sutehai, [%{hai: tsumohai, tsumogiri: true} | sutehai])
+          end)
 
         # TODO: check can anyone furo
 
@@ -57,11 +58,12 @@ defmodule Mj.Game.Server do
     def dahai(game = %__MODULE__{players: players, hands: hands, tsumo_player_index: tsumo_player_index, tsumohai: tsumohai}, player_id, dahai) do
       if player_id == players[tsumo_player_index] do
         if dahai in get_in(hands, [player_id, :tehai]) do
-          hands = Map.update!(hands, player_id, fn hand = %{tehai: tehai, sutehai: sutehai} ->
-            hand
-            |> Map.put(:sutehai, [%{hai: dahai, tsumogiri: false} | sutehai])
-            |> Map.put(:tehai, [tsumohai | Enum.reject(tehai, & &1 == dahai)])
-          end)
+          hands =
+            Map.update!(hands, player_id, fn hand = %{tehai: tehai, sutehai: sutehai} ->
+              hand
+              |> Map.put(:sutehai, [%{hai: dahai, tsumogiri: false} | sutehai])
+              |> Map.put(:tehai, [tsumohai | Enum.reject(tehai, &(&1 == dahai))])
+            end)
 
           next_tsumo_player_index = rem(tsumo_player_index + 1, length(players))
           game = %GameState{game | tsumohai: nil, tsumo_player_index: next_tsumo_player_index, hands: hands}
