@@ -115,6 +115,10 @@ defmodule Mj.Game.Server do
     end
   end
 
+  def handle_event({:call, from}, {:add_player, _player_id}, _other, game) do
+    {:keep_state, game, {:reply, from, {:error, :full}}}
+  end
+
   def handle_event(:internal, :start_game, :wait_for_players, game) do
     {:ok, game = %{players: players, hands: hands}} = GameState.haipai(game)
 
@@ -133,14 +137,6 @@ defmodule Mj.Game.Server do
     MjWeb.GameEventPusher.tsumo(tsumo_player, %{tsumohai: tsumohai, other_players: other_players})
 
     {:next_state, :wait_for_dahai, game}
-  end
-
-  def handle_event({:call, from}, {:add_player, _}, :tsumoban, _game) do
-    {:keep_state_and_data, {:reply, from, {:error, :full}}}
-  end
-
-  def handle_event({:call, from}, {:add_player, _}, :wait_for_dahai, _game) do
-    {:keep_state_and_data, {:reply, from, {:error, :full}}}
   end
 
   def handle_event({:call, from}, {:dahai, player_id, dahai}, :wait_for_dahai, game = %{tsumohai: dahai}) do
