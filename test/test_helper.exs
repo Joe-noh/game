@@ -1,4 +1,6 @@
 ExUnit.start()
+Faker.start()
+
 Ecto.Adapters.SQL.Sandbox.mode(Mj.Repo, :manual)
 
 defmodule TestHelpers do

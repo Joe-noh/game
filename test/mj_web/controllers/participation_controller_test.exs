@@ -3,7 +3,7 @@ defmodule MjWeb.ParticipationControllerTest do
 
   describe "declare participation" do
     setup %{conn: conn} do
-      {:ok, user} = Mj.Identities.create_user(%{name: "john"})
+      {:ok, user} = Fixtures.create(:user)
       conn = TestHelpers.login(conn, user)
 
       %{conn: conn, user: user}
