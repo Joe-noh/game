@@ -83,7 +83,7 @@ defmodule Mj.Game.Server do
   end
 
   def callback_mode do
-    :state_functions
+    :handle_event_function
   end
 
   def start_link(id) do
@@ -104,7 +104,7 @@ defmodule Mj.Game.Server do
     {:ok, :wait_for_players, GameState.new(id)}
   end
 
-  def wait_for_players({:call, from}, {:add_player, player_id}, game = %{players: players}) do
+  def handle_event({:call, from}, {:add_player, player_id}, :wait_for_players, game = %{players: players}) do
     if player_id in players do
       {:keep_state_and_data, {:reply, from, {:error, :already_joined}}}
     else
@@ -118,7 +118,7 @@ defmodule Mj.Game.Server do
     end
   end
 
-  def wait_for_players(:internal, :start_game, game) do
+  def handle_event(:internal, :start_game, :wait_for_players, game) do
     {:ok, game = %{players: players, hands: hands}} = GameState.haipai(game)
 
     Enum.each(players, fn player ->
@@ -129,7 +129,7 @@ defmodule Mj.Game.Server do
     {:next_state, :tsumoban, game, {:next_event, :internal, :tsumo}}
   end
 
-  def tsumoban(:internal, :tsumo, game = %{players: players, tsumo_player_index: tsumo_player_index}) do
+  def handle_event(:internal, :tsumo, :tsumoban, game = %{players: players, tsumo_player_index: tsumo_player_index}) do
     {tsumo_player, other_players} = List.pop_at(players, tsumo_player_index)
     {:ok, game = %{tsumohai: tsumohai, yamahai: _yamahai}} = GameState.tsumo(game)
 
@@ -138,21 +138,21 @@ defmodule Mj.Game.Server do
     {:next_state, :wait_for_dahai, game}
   end
 
-  def tsumoban({:call, from}, {:add_player, _}, _game) do
+  def handle_event({:call, from}, {:add_player, _}, :tsumoban, _game) do
     {:keep_state_and_data, {:reply, from, {:error, :full}}}
   end
 
-  def wait_for_dahai({:call, from}, {:add_player, _}, _game) do
+  def handle_event({:call, from}, {:add_player, _}, :wait_for_dahai, _game) do
     {:keep_state_and_data, {:reply, from, {:error, :full}}}
   end
 
-  def wait_for_dahai({:call, from}, {:dahai, player_id, dahai}, game = %{tsumohai: dahai}) do
+  def handle_event({:call, from}, {:dahai, player_id, dahai}, :wait_for_dahai, game = %{tsumohai: dahai}) do
     {:ok, game} = GameState.tsumogiri(game, player_id)
 
     {:next_state, :tsumoban, game, [{:reply, from, :ok}, {:next_event, :internal, :tsumo}]}
   end
 
-  def wait_for_dahai({:call, from}, {:dahai, player_id, dahai}, game) do
+  def handle_event({:call, from}, {:dahai, player_id, dahai}, :wait_for_dahai, game) do
     {:ok, game} = GameState.dahai(game, player_id, dahai)
 
     {:next_state, :tsumoban, game, [{:reply, from, :ok}, {:next_event, :internal, :tsumo}]}
