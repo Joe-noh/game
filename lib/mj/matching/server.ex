@@ -42,7 +42,7 @@ defmodule Mj.Matching.Server do
       {:error, :already_joined} ->
         {:reply, {:error, :already_joined}, state}
 
-      {:ok, :start_game} ->
+      {:ok, :startable} ->
         Process.demonitor(ref)
         {:reply, {:ok, game_id}, state}
 

@@ -92,6 +92,10 @@ defmodule Mj.Game.Server do
     GenStateMachine.call(via_tuple(id), {:add_player, player_id})
   end
 
+  def start_game(id) do
+    GenStateMachine.cast(via_tuple(id), :start_game)
+  end
+
   def dahai(id, player_id, dahai) do
     GenStateMachine.call(via_tuple(id), {:dahai, player_id, dahai})
   end
@@ -108,7 +112,7 @@ defmodule Mj.Game.Server do
       game = %GameState{game | players: [player_id | players]}
 
       if length(game.players) == 4 do
-        {:keep_state, game, [{:reply, from, {:ok, :start_game}}, {:next_event, :internal, :start_game}]}
+        {:next_state, :startable, game, {:reply, from, {:ok, :startable}}}
       else
         {:keep_state, game, {:reply, from, {:ok, :waiting}}}
       end
@@ -119,7 +123,7 @@ defmodule Mj.Game.Server do
     {:keep_state, game, {:reply, from, {:error, :full}}}
   end
 
-  def handle_event(:internal, :start_game, :wait_for_players, game) do
+  def handle_event(:cast, :start_game, :startable, game) do
     {:ok, game = %{players: players, hands: hands}} = GameState.haipai(game)
 
     Enum.each(players, fn player ->
@@ -128,6 +132,10 @@ defmodule Mj.Game.Server do
     end)
 
     {:next_state, :tsumoban, game, {:next_event, :internal, :tsumo}}
+  end
+
+  def handle_event(:cast, :start_game, _other, game) do
+    {:keep_state, game}
   end
 
   def handle_event(:internal, :tsumo, :tsumoban, game = %{players: players, tsumo_player_index: tsumo_player_index}) do
