@@ -16,10 +16,11 @@ defmodule Fixtures do
   end
 
   def create(resource, num, attrs \\ %{}) when is_integer(num) and num > 0 do
-    resources = Enum.map(1..num, fn _ ->
-      {:ok, resource} = create(resource, attrs)
-      resource
-    end)
+    resources =
+      Enum.map(1..num, fn _ ->
+        {:ok, resource} = create(resource, attrs)
+        resource
+      end)
 
     {:ok, resources}
   end
