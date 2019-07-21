@@ -43,7 +43,7 @@ defmodule Mj.GameTest do
 
       Mj.Game.start_game(game_id)
 
-      assert {:wait_for_dahai, _game} = :sys.get_state(pid)
+      assert {:wait_for_dahai, _game} = :sys.get_state(pid, 1000)
     end
 
     test "cannot start if the game is not startable", %{game_id: game_id, pid: pid} do
@@ -53,7 +53,7 @@ defmodule Mj.GameTest do
 
       Mj.Game.start_game(game_id)
 
-      assert {:wait_for_players, _game} = :sys.get_state(pid)
+      assert {:wait_for_players, _game} = :sys.get_state(pid, 1000)
     end
   end
 end
