@@ -1,4 +1,5 @@
 defmodule Mj.Game.Server do
+  use GenStateMachine
   require Logger
 
   defmodule GameState do
@@ -82,21 +83,17 @@ defmodule Mj.Game.Server do
     %{id: id, start: {__MODULE__, :start_link, [id]}}
   end
 
-  def callback_mode do
-    :handle_event_function
-  end
-
   def start_link(id) do
     Logger.info("Starting Game.Server (id: #{id})")
-    :gen_statem.start_link(via_tuple(id), __MODULE__, id, [])
+    GenStateMachine.start_link(__MODULE__, id, name: via_tuple(id))
   end
 
   def add_player(id, player_id) do
-    :gen_statem.call(via_tuple(id), {:add_player, player_id})
+    GenStateMachine.call(via_tuple(id), {:add_player, player_id})
   end
 
   def dahai(id, player_id, dahai) do
-    :gen_statem.call(via_tuple(id), {:dahai, player_id, dahai})
+    GenStateMachine.call(via_tuple(id), {:dahai, player_id, dahai})
   end
 
   def init(id) do

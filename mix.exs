@@ -29,6 +29,7 @@ defmodule Mj.MixProject do
       {:ecto_sql, "~> 3.0"},
       {:elixir_uuid, "~> 1.2"},
       {:gettext, "~> 0.11"},
+      {:gen_state_machine, "~> 2.0"},
       {:guardian, "~> 1.2"},
       {:horde, "~> 0.6"},
       {:jason, "~> 1.0"},
