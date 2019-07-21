@@ -10,7 +10,7 @@ defmodule MjWeb.ParticipationController do
       |> put_status(201)
       |> render("show.json", participation: %{game_id: game_id})
     else
-      :error ->
+      {:error, _reason} ->
         conn
         |> put_status(400)
         |> render(MjWeb.ErrorView, "error.json")
