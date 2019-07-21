@@ -155,6 +155,10 @@ defmodule Mj.Game.Server do
     {:next_state, :tsumoban, game, [{:reply, from, :ok}, {:next_event, :internal, :tsumo}]}
   end
 
+  def handle_event(:info, {:EXIT, _pid, :shutdown}, _state, _game) do
+    :stop
+  end
+
   def terminate(_reason, state, game = %{id: id}) do
     Logger.info("id: #{id} terminating. state: #{inspect(state)}, game: #{inspect(game)}")
     :ok
