@@ -5,7 +5,7 @@ defmodule MjWeb.UserSocketTest do
 
   describe "connect" do
     test "with authenticated user" do
-      {:ok, user} = Mj.Identities.create_user(%{name: "john"})
+      {:ok, user} = Fixtures.create(:user)
       {:ok, token, _claims} = MjWeb.Guardian.encode_and_sign(user)
 
       assert {:ok, _socket} = connect(UserSocket, %{"token" => token}, %{})
