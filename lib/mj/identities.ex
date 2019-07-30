@@ -34,7 +34,7 @@ defmodule Mj.Identities do
   def verify_password(user = %User{}, password) do
     %PasswordIdentity{digest: digest} = Ecto.assoc(user, :password_identity) |> Repo.one()
 
-    Argon2.verify_pass(password, digest)
+    Argon2.verify_pass(password, digest) && user
   end
 
   def verify_password(_, _) do

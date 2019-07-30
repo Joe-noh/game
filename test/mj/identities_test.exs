@@ -43,8 +43,8 @@ defmodule Mj.IdentitiesTest do
     end
 
     test "returns true if name/password is correct" do
-      assert Identities.verify_password("john", "str0ngp4ssw0rd")
-      refute Identities.verify_password("john", "wr0ngp4ssw0rd")
+      assert %Identities.User{} = Identities.verify_password("john", "str0ngp4ssw0rd")
+      assert false == Identities.verify_password("john", "wr0ngp4ssw0rd")
     end
   end
 end
