@@ -9,9 +9,11 @@ defmodule Fixtures do
 
   def create(:user, attrs) when is_map(attrs) do
     %{
-      name: Faker.Internet.user_name()
+      name: Faker.Internet.user_name(),
+      password: Faker.String.base64(20)
     }
     |> Map.merge(attrs)
+    |> stringify_keys()
     |> Mj.Identities.create_user()
   end
 
@@ -23,5 +25,14 @@ defmodule Fixtures do
       end)
 
     {:ok, resources}
+  end
+
+  defp stringify_keys(attrs) do
+    attrs
+    |> Enum.map(fn
+      {k, v} when is_atom(k) -> {Atom.to_string(k), v}
+      {k, v} when is_binary(k) -> {k, v}
+    end)
+    |> Enum.into(%{})
   end
 end
