@@ -14,4 +14,11 @@ defmodule MjWeb.FallbackController do
     |> put_view(MjWeb.ErrorView)
     |> render("404.json")
   end
+
+  def call(conn, {:error, :unauthorized}) do
+    conn
+    |> put_status(:unauthorized)
+    |> put_view(MjWeb.ErrorView)
+    |> render("401.json")
+  end
 end
