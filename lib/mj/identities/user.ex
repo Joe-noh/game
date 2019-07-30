@@ -5,6 +5,8 @@ defmodule Mj.Identities.User do
   schema "users" do
     field :name, :string
 
+    has_one :password_identity, Mj.Identities.PasswordIdentity
+
     timestamps()
   end
 
