@@ -35,4 +35,16 @@ defmodule Mj.IdentitiesTest do
       assert changeset.errors |> Keyword.has_key?(:name)
     end
   end
+
+  describe "verify_password/2" do
+    setup do
+      Fixtures.create(:user, %{"name" => "john", "password" => "str0ngp4ssw0rd"})
+      :ok
+    end
+
+    test "returns true if name/password is correct" do
+      assert Identities.verify_password("john", "str0ngp4ssw0rd")
+      refute Identities.verify_password("john", "wr0ngp4ssw0rd")
+    end
+  end
 end
