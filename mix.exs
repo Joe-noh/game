@@ -9,6 +9,7 @@ defmodule Mj.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
+      dialyzer: [plt_add_deps: :transitive],
       aliases: aliases(),
       deps: deps()
     ]
@@ -40,6 +41,7 @@ defmodule Mj.MixProject do
       {:phoenix_pubsub, "~> 1.1"},
       {:plug_cowboy, "~> 2.0"},
       {:postgrex, ">= 0.0.0"},
+      {:dialyxir, "~> 1.0.0-rc.6", only: :dev, runtime: false},
       {:faker, "~> 0.12", only: :test}
     ]
   end
