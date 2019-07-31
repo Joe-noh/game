@@ -11,10 +11,12 @@ defmodule MjWeb.UserController do
   end
 
   def create(conn, %{"user" => user_params}) do
-    with {:ok, user} <- Identities.create_user(user_params) do
+    with {:ok, user} <- Identities.create_user(user_params),
+         {:ok, token, _claims} <- MjWeb.Guardian.encode_and_sign(user) do
       conn
       |> put_status(201)
-      |> render("show.json", user: user)
+      |> put_view(MjWeb.SessionView)
+      |> render("show.json", %{token: token})
     end
   end
 end
