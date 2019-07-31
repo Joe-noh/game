@@ -26,7 +26,7 @@ defmodule MjWeb.UserControllerTest do
         |> post(Routes.user_path(conn, :create), user: %{name: "john", password: "password"})
         |> json_response(201)
 
-      assert %{"id" => id, "name" => "john"} = json["data"]
+      assert %{"token" => _token} = json["data"]
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
