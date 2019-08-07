@@ -31,6 +31,11 @@ defmodule MjWeb.Endpoint do
 
   plug Plug.MethodOverride
   plug Plug.Head
+  plug Corsica,
+    origins: "*",
+    max_age: 600,
+    allow_methods: :all,
+    allow_headers: :all
 
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
