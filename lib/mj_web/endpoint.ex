@@ -31,6 +31,7 @@ defmodule MjWeb.Endpoint do
 
   plug Plug.MethodOverride
   plug Plug.Head
+
   plug Corsica,
     origins: "*",
     max_age: 600,

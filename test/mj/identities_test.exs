@@ -14,7 +14,7 @@ defmodule Mj.IdentitiesTest do
     end
 
     test "raise if user does not exist" do
-      assert_raise Ecto.NoResultsError, fn -> Identities.get_user!(0) end
+      assert_raise Ecto.NoResultsError, fn -> Identities.get_user!("fa1b53c8-4c70-4d30-bee6-560fb8891ef5") end
     end
   end
 
