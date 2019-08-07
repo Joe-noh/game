@@ -2,6 +2,8 @@ defmodule Mj.Identities.PasswordIdentity do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @primary_key {:id, :binary_id, autogenerate: true}
+  @foreign_key_type :binary_id
   schema "password_identities" do
     field :digest, :string
     field :password, :string, virtual: true

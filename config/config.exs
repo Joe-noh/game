@@ -1,7 +1,8 @@
 import Config
 
 config :mj,
-  ecto_repos: [Mj.Repo]
+  ecto_repos: [Mj.Repo],
+  generators: [binary_id: true]
 
 config :mj, MjWeb.Endpoint,
   url: [host: "localhost"],
