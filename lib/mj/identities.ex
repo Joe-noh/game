@@ -1,4 +1,6 @@
 defmodule Mj.Identities do
+  import Ecto.Query
+
   alias Mj.Repo
   alias Mj.Identities.{User, PasswordIdentity, SocialAccount}
 
@@ -27,7 +29,7 @@ defmodule Mj.Identities do
 
   def signup_with_firebase_payload(payload = %{"aud" => aud}) do
     with true <- valid_aud?(aud),
-         {:ok, map} <- do_signup_with_firebase_payload(payload) do
+         {:ok, map = %{user: _, social_account: _}} <- do_signup_with_firebase_payload(payload) do
       {:ok, map}
     else
       {:error, _, changeset, _} ->
@@ -38,17 +40,28 @@ defmodule Mj.Identities do
   defp do_signup_with_firebase_payload(%{"name" => name, "firebase" => firebase}) do
     provider = get_in(firebase, ["sign_in_provider"])
     [uid | _] = get_in(firebase, ["identities", provider])
-    changeset = User.changeset(%User{}, %{name: name})
 
-    Ecto.Multi.new()
-    |> Ecto.Multi.insert(:user, changeset)
-    |> Ecto.Multi.run(:social_account, fn repo, %{user: user} ->
-      user
-      |> Ecto.build_assoc(:social_account)
-      |> SocialAccount.changeset(%{uid: uid, provider: provider})
-      |> repo.insert()
-    end)
-    |> Repo.transaction()
+    SocialAccount
+    |> where([s], s.provider == ^provider and s.uid == ^uid)
+    |> Repo.one()
+    |> case do
+      nil ->
+        changeset = User.changeset(%User{}, %{name: name})
+
+        Ecto.Multi.new()
+        |> Ecto.Multi.insert(:user, changeset)
+        |> Ecto.Multi.run(:social_account, fn repo, %{user: user} ->
+          user
+          |> Ecto.build_assoc(:social_account)
+          |> SocialAccount.changeset(%{uid: uid, provider: provider})
+          |> repo.insert()
+        end)
+        |> Repo.transaction()
+
+      social_account ->
+        user = social_account |> Ecto.assoc(:user) |> Repo.one()
+        {:ok, %{user: user, social_account: social_account}}
+    end
   end
 
   defp valid_aud?(aud) do

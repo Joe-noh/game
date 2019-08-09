@@ -62,6 +62,14 @@ defmodule Mj.IdentitiesTest do
       assert social_account.uid == "275472173"
       assert social_account.provider == "twitter.com"
     end
+
+    test "returns existing user if signed up twice" do
+      {:ok, %{user: u1, social_account: s1}} = Identities.signup_with_firebase_payload(@firebase_payload)
+      {:ok, %{user: u2, social_account: s2}} = Identities.signup_with_firebase_payload(@firebase_payload)
+
+      assert u1.id == u2.id
+      assert s1.id == s2.id
+    end
   end
 
   describe "verify_password/2" do
