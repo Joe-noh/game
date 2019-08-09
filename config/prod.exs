@@ -4,6 +4,8 @@ config :mj, MjWeb.Endpoint,
   url: [host: "example.com", port: 80],
   server: true
 
+config :mj, :firebase, aud: "mah-production"
+
 config :libcluster,
   topologies: [
     kubernetes: [

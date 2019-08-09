@@ -36,6 +36,34 @@ defmodule Mj.IdentitiesTest do
     end
   end
 
+  @firebase_payload %{
+    "name" => "風化させないbot",
+    "picture" => "https =>//pbs.twimg.com/profile_images/986579596693794816/AVrTgv1h_normal.jpg",
+    "iss" => "https =>//securetoken.google.com/mah-development",
+    "aud" => "mah-development",
+    "auth_time" => 1_565_347_634,
+    "user_id" => "HDsoCmiNUrQzC6MxtpaljELDFQv1",
+    "sub" => "HDsoCmiNUrQzC6MxtpaljELDFQv1",
+    "iat" => 1_565_347_634,
+    "exp" => 1_565_351_234,
+    "firebase" => %{
+      "identities" => %{
+        "twitter.com" => ["275472173"]
+      },
+      "sign_in_provider" => "twitter.com"
+    }
+  }
+
+  describe "signup_with_firebase_payload/1" do
+    test "create user and social_account" do
+      {:ok, %{user: user, social_account: social_account}} = Identities.signup_with_firebase_payload(@firebase_payload)
+
+      assert user.name == "風化させないbot"
+      assert social_account.uid == "275472173"
+      assert social_account.provider == "twitter.com"
+    end
+  end
+
   describe "verify_password/2" do
     setup do
       Fixtures.create(:user, %{"name" => "john", "password" => "str0ngp4ssw0rd"})
