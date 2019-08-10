@@ -8,13 +8,27 @@ defmodule Fixtures do
   end
 
   def create(:user, attrs) when is_map(attrs) do
-    %{
+    defaults = %{
       name: Faker.Internet.user_name(),
-      password: Faker.String.base64(20)
+      provider: "twitter.com",
+      uid: Faker.random_between(100_000, 999_999) |> Integer.to_string()
     }
-    |> Map.merge(attrs)
-    |> stringify_keys()
-    |> Mj.Identities.create_user()
+
+    %{name: name, provider: provider, uid: uid} = Map.merge(defaults, attrs)
+
+    {:ok, %{user: user}} =
+      Mj.Identities.signup_with_firebase_payload(%{
+        "name" => name,
+        "aud" => "mah-development",
+        "firebase" => %{
+          "identities" => %{
+            provider => [uid]
+          },
+          "sign_in_provider" => provider
+        }
+      })
+
+    {:ok, user}
   end
 
   def create(resource, num, attrs \\ %{}) when is_integer(num) and num > 0 do

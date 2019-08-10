@@ -14,6 +14,8 @@ config :mj, MjWeb.Guardian,
   issuer: "mj",
   secret_key: "6x7/p/jsoEGWZ4Cu6TLaAB2MopJtKtP78vwwty7kXWMmVjgSe2kYupAy1cYskG3k"
 
+config :mj, :firebase, aud: "mah-development"
+
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]

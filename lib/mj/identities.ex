@@ -1,23 +1,24 @@
 defmodule Mj.Identities do
+  import Ecto.Query
+
   alias Mj.Repo
-  alias Mj.Identities.{User, PasswordIdentity}
+  alias Mj.Identities.{User, SocialAccount}
 
   def get_user!(id) do
     Repo.get!(User, id)
   end
 
+  def get_social_account_by(provider: provider, uid: uid) do
+    SocialAccount
+    |> where([s], s.provider == ^provider and s.uid == ^uid)
+    |> Repo.one()
+  end
+
   def create_user(attrs \\ %{}) do
-    {password, attrs} = Map.pop(attrs, "password")
     changeset = %User{} |> User.changeset(attrs)
 
     Ecto.Multi.new()
     |> Ecto.Multi.insert(:user, changeset)
-    |> Ecto.Multi.run(:password_identity, fn repo, %{user: user} ->
-      user
-      |> Ecto.build_assoc(:password_identity)
-      |> PasswordIdentity.changeset(%{password: password})
-      |> repo.insert()
-    end)
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
@@ -25,19 +26,41 @@ defmodule Mj.Identities do
     end
   end
 
-  def verify_password(name, password) when is_binary(name) do
-    User
-    |> Repo.get_by(name: name)
-    |> verify_password(password)
+  def signup_with_firebase_payload(payload = %{"aud" => aud}) do
+    with true <- valid_aud?(aud),
+         {:ok, map = %{user: _, social_account: _}} <- do_signup_with_firebase_payload(payload) do
+      {:ok, map}
+    else
+      false -> :error
+      {:error, _, changeset, _} -> {:error, changeset}
+    end
   end
 
-  def verify_password(user = %User{}, password) do
-    %PasswordIdentity{digest: digest} = Ecto.assoc(user, :password_identity) |> Repo.one()
+  defp do_signup_with_firebase_payload(%{"name" => name, "firebase" => firebase}) do
+    provider = get_in(firebase, ["sign_in_provider"])
+    [uid | _] = get_in(firebase, ["identities", provider])
 
-    Argon2.verify_pass(password, digest) && user
+    case get_social_account_by(provider: provider, uid: uid) do
+      nil ->
+        changeset = User.changeset(%User{}, %{name: name})
+
+        Ecto.Multi.new()
+        |> Ecto.Multi.insert(:user, changeset)
+        |> Ecto.Multi.run(:social_account, fn repo, %{user: user} ->
+          user
+          |> Ecto.build_assoc(:social_accounts)
+          |> SocialAccount.changeset(%{uid: uid, provider: provider})
+          |> repo.insert()
+        end)
+        |> Repo.transaction()
+
+      social_account ->
+        user = social_account |> Ecto.assoc(:user) |> Repo.one()
+        {:ok, %{user: user, social_account: social_account}}
+    end
   end
 
-  def verify_password(_, _) do
-    Argon2.no_user_verify()
+  defp valid_aud?(aud) do
+    Application.get_env(:mj, :firebase) |> Keyword.get(:aud) == aud
   end
 end

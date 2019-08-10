@@ -27,10 +27,10 @@ defmodule Mj.MixProject do
 
   defp deps do
     [
-      {:argon2_elixir, "~> 2.0"},
       {:corsica, "~> 1.0"},
       {:ecto_sql, "~> 3.0"},
       {:elixir_uuid, "~> 1.2"},
+      {:firebase_jwt, "~> 0.1.0"},
       {:gettext, "~> 0.11"},
       {:gen_state_machine, "~> 2.0"},
       {:guardian, "~> 1.2"},
