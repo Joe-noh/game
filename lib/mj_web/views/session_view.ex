@@ -1,5 +1,5 @@
-defmodule MjWeb.SessionView do
-  use MjWeb, :view
+defmodule MahWeb.SessionView do
+  use MahWeb, :view
 
   def render("show.json", %{token: token}) do
     %{data: render_one(%{token: token}, __MODULE__, "session.json")}

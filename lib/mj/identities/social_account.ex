@@ -1,4 +1,4 @@
-defmodule Mj.Identities.SocialAccount do
+defmodule Mah.Identities.SocialAccount do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -8,7 +8,7 @@ defmodule Mj.Identities.SocialAccount do
     field :uid, :string
     field :provider, :string
 
-    belongs_to :user, Mj.Identities.User
+    belongs_to :user, Mah.Identities.User
 
     timestamps()
   end

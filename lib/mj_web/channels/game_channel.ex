@@ -1,5 +1,5 @@
-defmodule MjWeb.GameChannel do
-  use MjWeb, :channel
+defmodule MahWeb.GameChannel do
+  use MahWeb, :channel
 
   def join("game:" <> _game_id, _payload, socket) do
     send(self(), :track_presence)
@@ -7,8 +7,8 @@ defmodule MjWeb.GameChannel do
   end
 
   def handle_info(:track_presence, socket) do
-    push(socket, "presence_state", MjWeb.Presence.list(socket))
-    {:ok, _} = MjWeb.Presence.track(socket, socket.assigns.user_id, %{})
+    push(socket, "presence_state", MahWeb.Presence.list(socket))
+    {:ok, _} = MahWeb.Presence.track(socket, socket.assigns.user_id, %{})
 
     {:noreply, socket}
   end

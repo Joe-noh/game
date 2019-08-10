@@ -1,8 +1,8 @@
-defmodule Mj.Identities do
+defmodule Mah.Identities do
   import Ecto.Query
 
-  alias Mj.Repo
-  alias Mj.Identities.{User, SocialAccount}
+  alias Mah.Repo
+  alias Mah.Identities.{User, SocialAccount}
 
   def get_user!(id) do
     Repo.get!(User, id)
@@ -61,6 +61,6 @@ defmodule Mj.Identities do
   end
 
   defp valid_aud?(aud) do
-    Application.get_env(:mj, :firebase) |> Keyword.get(:aud) == aud
+    Application.get_env(:mah, :firebase) |> Keyword.get(:aud) == aud
   end
 end

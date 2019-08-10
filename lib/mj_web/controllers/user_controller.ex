@@ -1,9 +1,9 @@
-defmodule MjWeb.UserController do
-  use MjWeb, :controller
+defmodule MahWeb.UserController do
+  use MahWeb, :controller
 
-  alias Mj.Identities
+  alias Mah.Identities
 
-  action_fallback MjWeb.FallbackController
+  action_fallback MahWeb.FallbackController
 
   def show(conn, %{"id" => id}) do
     user = Identities.get_user!(id)
@@ -13,10 +13,10 @@ defmodule MjWeb.UserController do
   def create(conn, %{"user" => %{"id_token" => id_token}}) do
     with {:ok, payload} <- FirebaseJwt.verify(id_token),
          {:ok, %{user: user}} <- Identities.signup_with_firebase_payload(payload),
-         {:ok, token, _claims} <- MjWeb.Guardian.encode_and_sign(user) do
+         {:ok, token, _claims} <- MahWeb.Guardian.encode_and_sign(user) do
       conn
       |> put_status(201)
-      |> put_view(MjWeb.SessionView)
+      |> put_view(MahWeb.SessionView)
       |> render("show.json", %{token: token})
     else
       :error -> {:error, :bad_request}

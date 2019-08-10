@@ -1,4 +1,4 @@
-defmodule MjWeb.Presence do
+defmodule MahWeb.Presence do
   @moduledoc """
   Provides presence tracking to channels and processes.
 
@@ -9,9 +9,9 @@ defmodule MjWeb.Presence do
 
   Presences can be tracked in your channel after joining:
 
-      defmodule Mj.MyChannel do
-        use MjWeb, :channel
-        alias MjWeb.Presence
+      defmodule Mah.MyChannel do
+        use MahWeb, :channel
+        alias MahWeb.Presence
 
         def join("some:topic", _params, socket) do
           send(self(), :after_join)
@@ -69,6 +69,6 @@ defmodule MjWeb.Presence do
   original presence data.
   """
   use Phoenix.Presence,
-    otp_app: :mj,
-    pubsub_server: Mj.PubSub
+    otp_app: :mah,
+    pubsub_server: Mah.PubSub
 end

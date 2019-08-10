@@ -1,7 +1,7 @@
-defmodule Mj.IdentitiesTest do
-  use Mj.DataCase, async: true
+defmodule Mah.IdentitiesTest do
+  use Mah.DataCase, async: true
 
-  alias Mj.Identities
+  alias Mah.Identities
 
   describe "get_user!/1" do
     setup do

@@ -1,4 +1,4 @@
-defmodule Mj.Game.Server do
+defmodule Mah.Game.Server do
   use GenStateMachine, callback_mode: :handle_event_function
   require Logger
 
@@ -27,7 +27,7 @@ defmodule Mj.Game.Server do
     end
 
     defp do_haipai(game = %__MODULE__{players: players}) do
-      %{players: players, hands: hands, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai} = Mj.Mahjong.haipai(players, %{})
+      %{players: players, hands: hands, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai} = Mah.Mahjong.haipai(players, %{})
 
       %__MODULE__{game | players: players, hands: hands, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai}
     end
@@ -128,7 +128,7 @@ defmodule Mj.Game.Server do
 
     Enum.each(players, fn player ->
       hand = Map.get(hands, player)
-      MjWeb.GameEventPusher.game_start(player, %{players: players, hand: hand})
+      MahWeb.GameEventPusher.game_start(player, %{players: players, hand: hand})
     end)
 
     {:next_state, :tsumoban, game, {:next_event, :internal, :tsumo}}
@@ -142,7 +142,7 @@ defmodule Mj.Game.Server do
     {tsumo_player, other_players} = List.pop_at(players, tsumo_player_index)
     {:ok, game = %{tsumohai: tsumohai, yamahai: _yamahai}} = GameState.tsumo(game)
 
-    MjWeb.GameEventPusher.tsumo(tsumo_player, %{tsumohai: tsumohai, other_players: other_players})
+    MahWeb.GameEventPusher.tsumo(tsumo_player, %{tsumohai: tsumohai, other_players: other_players})
 
     {:next_state, :wait_for_dahai, game}
   end
@@ -169,6 +169,6 @@ defmodule Mj.Game.Server do
   end
 
   defp via_tuple(id) do
-    {:via, Horde.Registry, {Mj.GameRegistry, id}}
+    {:via, Horde.Registry, {Mah.GameRegistry, id}}
   end
 end

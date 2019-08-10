@@ -1,5 +1,5 @@
-defmodule MjWeb.ChangesetView do
-  use MjWeb, :view
+defmodule MahWeb.ChangesetView do
+  use MahWeb, :view
 
   def translate_errors(changeset) do
     Ecto.Changeset.traverse_errors(changeset, &translate_error/1)

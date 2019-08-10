@@ -1,4 +1,4 @@
-defmodule Mj.Cluster.LocalStrategy do
+defmodule Mah.Cluster.LocalStrategy do
   use Cluster.Strategy
 
   def start_link([%Cluster.Strategy.State{} = state]) do

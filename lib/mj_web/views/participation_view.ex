@@ -1,5 +1,5 @@
-defmodule MjWeb.ParticipationView do
-  use MjWeb, :view
+defmodule MahWeb.ParticipationView do
+  use MahWeb, :view
 
   def render("show.json", %{participation: participation}) do
     %{data: render_one(participation, __MODULE__, "participation.json")}

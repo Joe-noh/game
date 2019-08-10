@@ -1,17 +1,17 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: mj
+  name: mah
 spec:
   replicas: 2
   template:
     metadata:
       labels:
-        app: mj
+        app: mah
     spec:
       containers:
-        - name: mj
-          image: mj:local
+        - name: mah
+          image: mah:local
           imagePullPolicy: Never
           env:
             - name: POD_IP
@@ -24,7 +24,7 @@ spec:
                   name: app-secret
                   key: releaseCookie
             - name: RELEASE_NODE
-              value: "mj@$(POD_IP)"
+              value: "mah@$(POD_IP)"
             - name: RELEASE_DISTRIBUTION
               value: "name"
             - name: SECRET_KEY_BASE

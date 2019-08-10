@@ -1,10 +1,10 @@
-defmodule MjWeb.FallbackController do
-  use MjWeb, :controller
+defmodule MahWeb.FallbackController do
+  use MahWeb, :controller
 
   def call(conn, {:error, %Ecto.Changeset{} = changeset}) do
     conn
     |> put_status(:unprocessable_entity)
-    |> put_view(MjWeb.ChangesetView)
+    |> put_view(MahWeb.ChangesetView)
     |> render("error.json", changeset: changeset)
   end
 
@@ -23,7 +23,7 @@ defmodule MjWeb.FallbackController do
   defp render_error(conn, reason, template) do
     conn
     |> put_status(reason)
-    |> put_view(MjWeb.ErrorView)
+    |> put_view(MahWeb.ErrorView)
     |> render(template)
   end
 end

@@ -1,10 +1,10 @@
-defmodule MjWeb.UserSocket do
+defmodule MahWeb.UserSocket do
   use Phoenix.Socket
 
-  channel "game:*", MjWeb.GameChannel
+  channel "game:*", MahWeb.GameChannel
 
   def connect(%{"token" => token}, socket, _connect_info) do
-    case MjWeb.Guardian.decode_and_verify(token) do
+    case MahWeb.Guardian.decode_and_verify(token) do
       {:ok, %{"sub" => user_id}} ->
         {:ok, assign(socket, :user_id, user_id)}
 

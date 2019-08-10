@@ -1,4 +1,4 @@
-defmodule MjWeb.Guardian.ErrorHandler do
+defmodule MahWeb.Guardian.ErrorHandler do
   import Plug.Conn
 
   @behaviour Guardian.Plug.ErrorHandler

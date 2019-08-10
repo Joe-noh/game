@@ -1,7 +1,7 @@
-defmodule MjWeb.Endpoint do
-  use Phoenix.Endpoint, otp_app: :mj
+defmodule MahWeb.Endpoint do
+  use Phoenix.Endpoint, otp_app: :mah
 
-  socket "/socket", MjWeb.UserSocket,
+  socket "/socket", MahWeb.UserSocket,
     websocket: true,
     longpoll: false
 
@@ -11,7 +11,7 @@ defmodule MjWeb.Endpoint do
   # when deploying your static files in production.
   plug Plug.Static,
     at: "/",
-    from: :mj,
+    from: :mah,
     gzip: false,
     only: ~w(css fonts images js favicon.ico robots.txt)
 
@@ -43,8 +43,8 @@ defmodule MjWeb.Endpoint do
   # Set :encryption_salt if you would also like to encrypt it.
   plug Plug.Session,
     store: :cookie,
-    key: "_mj_key",
+    key: "_mah_key",
     signing_salt: "fkktCy0Q"
 
-  plug MjWeb.Router
+  plug MahWeb.Router
 end

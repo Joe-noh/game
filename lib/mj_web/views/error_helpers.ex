@@ -1,4 +1,4 @@
-defmodule MjWeb.ErrorHelpers do
+defmodule MahWeb.ErrorHelpers do
   @moduledoc """
   Conveniences for translating and building error messages.
   """
@@ -25,9 +25,9 @@ defmodule MjWeb.ErrorHelpers do
     # should be written to the errors.po file. The :count option is
     # set by Ecto and indicates we should also apply plural rules.
     if count = opts[:count] do
-      Gettext.dngettext(MjWeb.Gettext, "errors", msg, msg, count, opts)
+      Gettext.dngettext(MahWeb.Gettext, "errors", msg, msg, count, opts)
     else
-      Gettext.dgettext(MjWeb.Gettext, "errors", msg, opts)
+      Gettext.dgettext(MahWeb.Gettext, "errors", msg, opts)
     end
   end
 end

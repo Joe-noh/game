@@ -1,4 +1,4 @@
-defmodule Mj.Matching.Server do
+defmodule Mah.Matching.Server do
   use GenServer
 
   defmodule State do
@@ -24,8 +24,8 @@ defmodule Mj.Matching.Server do
   end
 
   def handle_call({:start_or_join, player_id}, _from, state = %{unstarted_games: []}) do
-    {:ok, pid, game_id} = Mj.Game.spawn_new_game()
-    Mj.Game.add_player(game_id, player_id)
+    {:ok, pid, game_id} = Mah.Game.spawn_new_game()
+    Mah.Game.add_player(game_id, player_id)
 
     ref = Process.monitor(pid)
 
@@ -35,7 +35,7 @@ defmodule Mj.Matching.Server do
   def handle_call({:start_or_join, player_id}, _from, state = %{unstarted_games: unstarted_games}) do
     [{game_id, ref} | rest] = unstarted_games
 
-    case Mj.Game.add_player(game_id, player_id) do
+    case Mah.Game.add_player(game_id, player_id) do
       {:error, :full} ->
         {:reply, {:error, :full}, %State{state | unstarted_games: rest}}
 

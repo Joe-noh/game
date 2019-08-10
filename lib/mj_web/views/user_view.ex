@@ -1,5 +1,5 @@
-defmodule MjWeb.UserView do
-  use MjWeb, :view
+defmodule MahWeb.UserView do
+  use MahWeb, :view
 
   def render("index.json", %{users: users}) do
     %{data: render_many(users, __MODULE__, "user.json")}

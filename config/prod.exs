@@ -1,18 +1,18 @@
 import Config
 
-config :mj, MjWeb.Endpoint,
+config :mah, MahWeb.Endpoint,
   url: [host: "example.com", port: 80],
   server: true
 
-config :mj, :firebase, aud: "mah-production"
+config :mah, :firebase, aud: "mah-production"
 
 config :libcluster,
   topologies: [
     kubernetes: [
       strategy: Elixir.Cluster.Strategy.Kubernetes.DNS,
       config: [
-        service: "mj-headless",
-        application_name: "mj",
+        service: "mah-headless",
+        application_name: "mah",
         polling_interval: 10_000
       ]
     ]

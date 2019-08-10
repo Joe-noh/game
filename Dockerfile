@@ -11,4 +11,4 @@ ADD . .
 RUN mix deps.get
 RUN mix release
 
-ENTRYPOINT ["/opt/app/_build/prod/rel/mj/bin/mj", "start"]
+ENTRYPOINT ["/opt/app/_build/prod/rel/mah/bin/mah", "start"]

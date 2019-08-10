@@ -1,12 +1,12 @@
-defmodule MjWeb.UserSocketTest do
-  use MjWeb.ChannelCase, async: true
+defmodule MahWeb.UserSocketTest do
+  use MahWeb.ChannelCase, async: true
 
-  alias MjWeb.UserSocket
+  alias MahWeb.UserSocket
 
   describe "connect" do
     test "with authenticated user" do
       {:ok, user} = Fixtures.create(:user)
-      {:ok, token, _claims} = MjWeb.Guardian.encode_and_sign(user)
+      {:ok, token, _claims} = MahWeb.Guardian.encode_and_sign(user)
 
       assert {:ok, _socket} = connect(UserSocket, %{"token" => token}, %{})
     end

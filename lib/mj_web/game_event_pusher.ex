@@ -1,4 +1,4 @@
-defmodule MjWeb.GameEventPusher do
+defmodule MahWeb.GameEventPusher do
   @moduledoc """
   This provides functions to push game events from server to clients.
   """
@@ -19,6 +19,6 @@ defmodule MjWeb.GameEventPusher do
 
   @spec push(player_id :: String.t(), event :: String.t(), payload :: map()) :: :ok | no_return()
   defp push(player_id, event, payload) do
-    MjWeb.Endpoint.broadcast!("user:#{player_id}", event, payload)
+    MahWeb.Endpoint.broadcast!("user:#{player_id}", event, payload)
   end
 end

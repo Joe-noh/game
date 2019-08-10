@@ -1,5 +1,5 @@
-defmodule MjWeb.UserControllerTest do
-  use MjWeb.ConnCase, async: true
+defmodule MahWeb.UserControllerTest do
+  use MahWeb.ConnCase, async: true
 
   describe "show user" do
     setup %{conn: conn} do

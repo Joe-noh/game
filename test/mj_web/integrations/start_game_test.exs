@@ -1,5 +1,5 @@
-defmodule MjWeb.StartGameTest do
-  use MjWeb.IntegrationCase, async: false
+defmodule MahWeb.StartGameTest do
+  use MahWeb.IntegrationCase, async: false
 
   describe "starting game" do
     test "normal case", %{conn: conn} do

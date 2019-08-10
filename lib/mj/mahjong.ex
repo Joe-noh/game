@@ -1,4 +1,4 @@
-defmodule Mj.Mahjong do
+defmodule Mah.Mahjong do
   @moduledoc """
   """
 

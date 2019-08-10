@@ -1,11 +1,11 @@
-defmodule MjWeb.ParticipationController do
-  use MjWeb, :controller
+defmodule MahWeb.ParticipationController do
+  use MahWeb, :controller
 
-  action_fallback MjWeb.FallbackController
+  action_fallback MahWeb.FallbackController
 
   def create(conn, _params) do
-    with %{id: player_id} = MjWeb.Guardian.Plug.current_resource(conn),
-         {:ok, game_id} <- Mj.Matching.Server.start_or_join(player_id) do
+    with %{id: player_id} = MahWeb.Guardian.Plug.current_resource(conn),
+         {:ok, game_id} <- Mah.Matching.Server.start_or_join(player_id) do
       conn
       |> put_status(201)
       |> render("show.json", participation: %{game_id: game_id})
@@ -13,7 +13,7 @@ defmodule MjWeb.ParticipationController do
       {:error, _reason} ->
         conn
         |> put_status(400)
-        |> render(MjWeb.ErrorView, "error.json")
+        |> render(MahWeb.ErrorView, "error.json")
     end
   end
 end

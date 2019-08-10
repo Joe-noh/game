@@ -1,8 +1,8 @@
-defmodule Mj.Identities.User do
+defmodule Mah.Identities.User do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias Mj.Identities.SocialAccount
+  alias Mah.Identities.SocialAccount
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id

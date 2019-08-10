@@ -1,4 +1,4 @@
-defmodule Mj.Cluster.Connector do
+defmodule Mah.Cluster.Connector do
   use GenServer
 
   def start_link([names, opts]) do

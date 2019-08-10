@@ -5,13 +5,13 @@
 # file to your .gitignore.
 import Config
 
-config :mj, Mj.Repo,
+config :mah, Mah.Repo,
   # ssl: true,
   url: System.fetch_env!("DATABASE_URL"),
   pool_size: String.to_integer(System.get_env("POOL_SIZE", "10"))
 
-config :mj, MjWeb.Endpoint,
+config :mah, MahWeb.Endpoint,
   http: [:inet6, port: String.to_integer(System.get_env("PORT", "4000"))],
   secret_key_base: System.fetch_env!("SECRET_KEY_BASE")
 
-config :mj, MjWeb.Guardian, secret_key: System.fetch_env!("JWT_SECRET_KEY")
+config :mah, MahWeb.Guardian, secret_key: System.fetch_env!("JWT_SECRET_KEY")

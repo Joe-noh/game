@@ -1,5 +1,5 @@
-defmodule MjWeb.ParticipationControllerTest do
-  use MjWeb.ConnCase, async: true
+defmodule MahWeb.ParticipationControllerTest do
+  use MahWeb.ConnCase, async: true
 
   describe "declare participation" do
     setup %{conn: conn} do
