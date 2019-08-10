@@ -1,9 +1,9 @@
-defmodule Mj.MixProject do
+defmodule Mah.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :mj,
+      app: :mah,
       version: "0.1.0",
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -17,7 +17,7 @@ defmodule Mj.MixProject do
 
   def application do
     [
-      mod: {Mj.Application, []},
+      mod: {Mah.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end

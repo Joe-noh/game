@@ -1,4 +1,4 @@
-defmodule MjWeb.ChannelCase do
+defmodule MahWeb.ChannelCase do
   @moduledoc """
   This module defines the test case to be used by
   channel tests.
@@ -21,15 +21,15 @@ defmodule MjWeb.ChannelCase do
       use Phoenix.ChannelTest
 
       # The default endpoint for testing
-      @endpoint MjWeb.Endpoint
+      @endpoint MahWeb.Endpoint
     end
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Mj.Repo)
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Mah.Repo)
 
     unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(Mj.Repo, {:shared, self()})
+      Ecto.Adapters.SQL.Sandbox.mode(Mah.Repo, {:shared, self()})
     end
 
     :ok

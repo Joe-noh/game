@@ -1,4 +1,4 @@
-defmodule Mj.Repo.Migrations.CreateSocialAccounts do
+defmodule Mah.Repo.Migrations.CreateSocialAccounts do
   use Ecto.Migration
 
   def change do

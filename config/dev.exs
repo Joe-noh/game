@@ -1,14 +1,14 @@
 import Config
 
-config :mj, Mj.Repo,
+config :mah, Mah.Repo,
   username: "postgres",
   password: "postgres",
-  database: "mj_dev",
+  database: "mah_dev",
   hostname: "localhost",
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
-config :mj, MjWeb.Endpoint,
+config :mah, MahWeb.Endpoint,
   http: [port: 4000],
   debug_errors: true,
   code_reloader: true,
@@ -17,7 +17,7 @@ config :mj, MjWeb.Endpoint,
 
 config :libcluster,
   topologies: [
-    local: [strategy: Mj.Cluster.LocalStrategy]
+    local: [strategy: Mah.Cluster.LocalStrategy]
   ]
 
 config :logger, :console, format: "[$level] $message\n"

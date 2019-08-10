@@ -1,4 +1,4 @@
-defmodule MjWeb.ConnCase do
+defmodule MahWeb.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -19,18 +19,18 @@ defmodule MjWeb.ConnCase do
     quote do
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
-      alias MjWeb.Router.Helpers, as: Routes
+      alias MahWeb.Router.Helpers, as: Routes
 
       # The default endpoint for testing
-      @endpoint MjWeb.Endpoint
+      @endpoint MahWeb.Endpoint
     end
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Mj.Repo)
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Mah.Repo)
 
     unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(Mj.Repo, {:shared, self()})
+      Ecto.Adapters.SQL.Sandbox.mode(Mah.Repo, {:shared, self()})
     end
 
     conn = Phoenix.ConnTest.build_conn() |> Plug.Conn.put_req_header("accept", "application/json")

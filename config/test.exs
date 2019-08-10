@@ -1,13 +1,13 @@
 import Config
 
-config :mj, Mj.Repo,
+config :mah, Mah.Repo,
   username: "postgres",
   password: "postgres",
-  database: "mj_test",
+  database: "mah_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
 
-config :mj, MjWeb.Endpoint,
+config :mah, MahWeb.Endpoint,
   http: [port: 4002],
   server: false
 

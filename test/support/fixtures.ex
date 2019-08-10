@@ -17,7 +17,7 @@ defmodule Fixtures do
     %{name: name, provider: provider, uid: uid} = Map.merge(defaults, attrs)
 
     {:ok, %{user: user}} =
-      Mj.Identities.signup_with_firebase_payload(%{
+      Mah.Identities.signup_with_firebase_payload(%{
         "name" => name,
         "aud" => "mah-development",
         "firebase" => %{

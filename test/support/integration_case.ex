@@ -1,25 +1,25 @@
-defmodule MjWeb.IntegrationCase do
+defmodule MahWeb.IntegrationCase do
   use ExUnit.CaseTemplate
 
   using do
     quote do
       use Phoenix.ConnTest
       use Phoenix.ChannelTest
-      alias MjWeb.Router.Helpers, as: Routes
+      alias MahWeb.Router.Helpers, as: Routes
 
       # The default endpoint for testing
-      @endpoint MjWeb.Endpoint
+      @endpoint MahWeb.Endpoint
     end
   end
 
   setup tags do
-    Application.stop(:mj)
-    Application.start(:mj)
+    Application.stop(:mah)
+    Application.start(:mah)
 
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Mj.Repo)
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Mah.Repo)
 
     unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(Mj.Repo, {:shared, self()})
+      Ecto.Adapters.SQL.Sandbox.mode(Mah.Repo, {:shared, self()})
     end
 
     conn = Phoenix.ConnTest.build_conn() |> Plug.Conn.put_req_header("accept", "application/json")
