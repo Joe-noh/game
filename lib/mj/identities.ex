@@ -8,6 +8,12 @@ defmodule Mj.Identities do
     Repo.get!(User, id)
   end
 
+  def get_social_account_by(provider: provider, uid: uid) do
+    SocialAccount
+    |> where([s], s.provider == ^provider and s.uid == ^uid)
+    |> Repo.one()
+  end
+
   def create_user(attrs \\ %{}) do
     changeset = %User{} |> User.changeset(attrs)
 
@@ -25,8 +31,8 @@ defmodule Mj.Identities do
          {:ok, map = %{user: _, social_account: _}} <- do_signup_with_firebase_payload(payload) do
       {:ok, map}
     else
-      {:error, _, changeset, _} ->
-        {:error, changeset}
+      false -> :error
+      {:error, _, changeset, _} -> {:error, changeset}
     end
   end
 
@@ -34,10 +40,7 @@ defmodule Mj.Identities do
     provider = get_in(firebase, ["sign_in_provider"])
     [uid | _] = get_in(firebase, ["identities", provider])
 
-    SocialAccount
-    |> where([s], s.provider == ^provider and s.uid == ^uid)
-    |> Repo.one()
-    |> case do
+    case get_social_account_by(provider: provider, uid: uid) do
       nil ->
         changeset = User.changeset(%User{}, %{name: name})
 

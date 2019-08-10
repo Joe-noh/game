@@ -18,6 +18,9 @@ defmodule MjWeb.UserController do
       |> put_status(201)
       |> put_view(MjWeb.SessionView)
       |> render("show.json", %{token: token})
+    else
+      :error -> {:error, :bad_request}
+      other -> other
     end
   end
 
