@@ -9,8 +9,7 @@ defmodule Mj.Identities.User do
   schema "users" do
     field :name, :string
 
-    has_one :password_identity, Mj.Identities.PasswordIdentity
-    has_one :social_account, SocialAccount
+    has_many :social_accounts, SocialAccount
     has_one :twitter_account, SocialAccount, where: [provider: "twitter.com"]
 
     timestamps()

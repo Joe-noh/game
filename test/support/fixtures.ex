@@ -9,8 +9,7 @@ defmodule Fixtures do
 
   def create(:user, attrs) when is_map(attrs) do
     %{
-      name: Faker.Internet.user_name(),
-      password: Faker.String.base64(20)
+      name: Faker.Internet.user_name()
     }
     |> Map.merge(attrs)
     |> stringify_keys()
