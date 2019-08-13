@@ -30,17 +30,17 @@ defmodule Mah.Game.Server do
     {:ok, :wait_for_players, GameState.new(id)}
   end
 
-  def handle_event({:call, from}, {:add_player, player_id}, :wait_for_players, game = %{players: players}) do
-    if player_id in players do
-      {:keep_state_and_data, {:reply, from, {:error, :already_joined}}}
-    else
-      game = %GameState{game | players: [player_id | players]}
+  def handle_event({:call, from}, {:add_player, player_id}, :wait_for_players, game) do
+    case GameState.add_player(game, player_id) do
+      error = {:error, :already_joined} ->
+        {:keep_state_and_data, {:reply, from, error}}
 
-      if length(game.players) == 4 do
-        {:next_state, :startable, game, {:reply, from, {:ok, :startable}}}
-      else
-        {:keep_state, game, {:reply, from, {:ok, :waiting}}}
-      end
+      {:ok, game} ->
+        if GameState.startable?(game) do
+          {:next_state, :startable, game, {:reply, from, {:ok, :startable}}}
+        else
+          {:keep_state, game, {:reply, from, {:ok, :waiting}}}
+        end
     end
   end
 

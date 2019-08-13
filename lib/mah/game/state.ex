@@ -16,8 +16,20 @@ defmodule Mah.Game.State do
     %__MODULE__{id: id}
   end
 
+  def add_player(game = %__MODULE__{players: players}, player_id) do
+    if player_id in players do
+      {:error, :already_joined}
+    else
+      {:ok, %__MODULE__{game | players: [player_id | players]}}
+    end
+  end
+
+  def startable?(%__MODULE__{players: players}) do
+    length(players) == 4
+  end
+
   def haipai(game) do
-    if length(game.players) == 4 do
+    if startable?(game) do
       {:ok, do_haipai(game)}
     else
       {:error, :not_enough_players}
