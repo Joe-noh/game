@@ -1,13 +1,32 @@
-defmodule Mah.Game.Server.GameGameStateTest do
+defmodule Mah.Game.StateTest do
   use ExUnit.Case, async: true
 
-  alias Mah.Game.Server.GameState
+  alias Mah.Game.State, as: GameState
 
   setup do
     state = GameState.new("game-id")
     state = %GameState{state | players: ~w[p1 p2 p3 p4]}
 
     %{state: state}
+  end
+
+  describe "add_player/2" do
+    test "accepts players who have not joined yet", %{state: state} do
+      state = %GameState{state | players: ~w[p1 p2 p3]}
+
+      assert {:error, :already_joined} == GameState.add_player(state, "p3")
+      assert {:ok, %GameState{}} = GameState.add_player(state, "p4")
+    end
+  end
+
+  describe "startable?/1" do
+    test "returns true if there were 4 players", %{state: state} do
+      assert true == GameState.startable?(state)
+    end
+
+    test "returns false when there are not enough players", %{state: state} do
+      assert false == GameState.startable?(%GameState{state | players: ~w[p1 p2 p3]})
+    end
   end
 
   describe "haipai/1" do
