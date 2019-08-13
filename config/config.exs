@@ -21,6 +21,6 @@ config :logger, :console,
   metadata: [:request_id]
 
 config :phoenix, :json_library, Jason
-config :phoenix, :filter_parameters, ~w[id_token]
+config :phoenix, :filter_parameters, ~w[id_token auth_token]
 
 import_config "#{Mix.env()}.exs"
