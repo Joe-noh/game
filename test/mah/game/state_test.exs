@@ -1,7 +1,7 @@
-defmodule Mah.Game.Server.GameGameStateTest do
+defmodule Mah.Game.StateTest do
   use ExUnit.Case, async: true
 
-  alias Mah.Game.Server.GameState
+  alias Mah.Game.State, as: GameState
 
   setup do
     state = GameState.new("game-id")
