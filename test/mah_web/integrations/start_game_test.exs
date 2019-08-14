@@ -25,13 +25,14 @@ defmodule MahWeb.StartGameTest do
       @endpoint.subscribe(topic3)
       @endpoint.subscribe(topic4)
 
-      :timer.sleep 100
+      :timer.sleep(100)
       {:messages, messages} = :erlang.process_info(self(), :messages)
 
-      %{payload: %{players: players = [chicha | except_chicha]}} = Enum.find(messages, fn
-        %{event: "game:start"} -> true
-        _else -> false
-      end)
+      %{payload: %{players: players = [chicha | except_chicha]}} =
+        Enum.find(messages, fn
+          %{event: "game:start"} -> true
+          _else -> false
+        end)
 
       assertions =
         messages
@@ -41,10 +42,13 @@ defmodule MahWeb.StartGameTest do
             assert payload.hand.sutehai == []
             assert payload.hand.furo == []
             assert payload.players == players
+
           %{event: "game:tsumo", topic: topic} ->
             assert topic == "user:#{chicha}"
+
           %{event: "game:tacha_tsumo", topic: topic} ->
-            assert topic in Enum.map(except_chicha, & "user:#{&1}")
+            assert topic in Enum.map(except_chicha, &"user:#{&1}")
+
           _ ->
             nil
         end)
