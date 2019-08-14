@@ -17,6 +17,10 @@ defmodule Mah.Game.Server do
     GenStateMachine.call(via_tuple(id), {:add_player, player_id})
   end
 
+  def startable_with?(id, players) do
+    GenStateMachine.call(via_tuple(id), {:startable_with?, players})
+  end
+
   def start_game(id) do
     GenStateMachine.cast(via_tuple(id), :start_game)
   end
@@ -46,6 +50,14 @@ defmodule Mah.Game.Server do
 
   def handle_event({:call, from}, {:add_player, _player_id}, _other, game) do
     {:keep_state, game, {:reply, from, {:error, :full}}}
+  end
+
+  def handle_event({:call, from}, {:startable_with?, players}, :startable, game) do
+    {:keep_state_and_data, {:reply, from, Enum.sort(game.players) == Enum.sort(players)}}
+  end
+
+  def handle_event({:call, from}, {:startable_with?, _players}, _other, _game) do
+    {:keep_state_and_data, {:reply, from, false}}
   end
 
   def handle_event(:cast, :start_game, :startable, game) do
