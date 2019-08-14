@@ -13,7 +13,8 @@ defmodule MahWeb.ParticipationController do
       {:error, _reason} ->
         conn
         |> put_status(400)
-        |> render(MahWeb.ErrorView, "error.json")
+        |> put_view(MahWeb.ErrorView)
+        |> render("error.json")
     end
   end
 end
