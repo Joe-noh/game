@@ -4,7 +4,7 @@ defmodule MahWeb.IntegrationCase do
   using do
     quote do
       use Phoenix.ConnTest
-      use Phoenix.ChannelTest
+      require Phoenix.ChannelTest
       alias MahWeb.Router.Helpers, as: Routes
 
       # The default endpoint for testing
