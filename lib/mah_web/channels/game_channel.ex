@@ -16,11 +16,8 @@ defmodule MahWeb.GameChannel do
         {:ok, players} = Mah.Game.players(game_id)
         {:ok, hands} = Mah.Game.hands(game_id)
 
-        Enum.each(players, fn player ->
-          MahWeb.GameEventPusher.game_start(player, %{players: players, hand: Map.get(hands, player)})
-        end)
-
-        MahWeb.GameEventPusher.tsumo(player, %{tsumohai: tsumohai, other_players: Enum.reject(players, & &1 == player)})
+        MahWeb.GameEventPusher.game_start(%{players: players, hands: hands})
+        MahWeb.GameEventPusher.tsumo(%{player: player, players: players, tsumohai: tsumohai})
       end
     end
 
@@ -37,7 +34,7 @@ defmodule MahWeb.GameChannel do
 
         if actions == [] do
           {:ok, %{player: player, tsumohai: tsumohai}} = Mah.Game.next_tsumo(game_id)
-          MahWeb.GameEventPusher.tsumo(player, %{tsumohai: tsumohai, other_players: Enum.reject(players, & &1 == player)})
+          MahWeb.GameEventPusher.tsumo(%{player: player, players: players, tsumohai: tsumohai})
 
           {:noreply, socket}
         else
