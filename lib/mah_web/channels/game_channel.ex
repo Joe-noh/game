@@ -1,6 +1,8 @@
 defmodule MahWeb.GameChannel do
   use MahWeb, :channel
 
+  alias MahWeb.GameChannel.EventPusher
+
   def join("game:" <> game_id, _payload, socket) do
     send(self(), :track_presence)
 
@@ -16,8 +18,8 @@ defmodule MahWeb.GameChannel do
         {:ok, players} = Mah.Game.players(game_id)
         {:ok, hands} = Mah.Game.hands(game_id)
 
-        MahWeb.GameEventPusher.game_start(%{players: players, hands: hands})
-        MahWeb.GameEventPusher.tsumo(%{player: player, players: players, tsumohai: tsumohai})
+        EventPusher.game_start(%{players: players, hands: hands})
+        EventPusher.tsumo(%{player: player, players: players, tsumohai: tsumohai})
       end
     end
 
@@ -28,13 +30,13 @@ defmodule MahWeb.GameChannel do
     case Mah.Game.dahai(game_id, user_id, hai) do
       {:ok, %{hai: hai, tsumogiri: tsumogiri}} ->
         {:ok, players} = Mah.Game.players(game_id)
-        MahWeb.GameEventPusher.dahai(%{player: user_id, players: players, hai: hai, tsumogiri: tsumogiri})
+        EventPusher.dahai(%{player: user_id, players: players, hai: hai, tsumogiri: tsumogiri})
 
         actions = [] # Mah.Game.possible_actions(game_id)
 
         if actions == [] do
           {:ok, %{player: player, tsumohai: tsumohai}} = Mah.Game.next_tsumo(game_id)
-          MahWeb.GameEventPusher.tsumo(%{player: player, players: players, tsumohai: tsumohai})
+          EventPusher.tsumo(%{player: player, players: players, tsumohai: tsumohai})
 
           {:noreply, socket}
         else

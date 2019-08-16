@@ -1,4 +1,4 @@
-defmodule MahWeb.GameEventPusher do
+defmodule MahWeb.GameChannel.EventPusher do
   @moduledoc """
   This provides functions to push game events from server to clients.
   """
