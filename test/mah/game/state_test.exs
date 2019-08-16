@@ -39,7 +39,7 @@ defmodule Mah.Game.StateTest do
     test "setup tiles", %{state: state} do
       {:ok, state} = GameState.haipai(state)
 
-      assert state.tsumo_player_index == 0
+      assert state.tsumo_player == state.players |> List.first
       assert length(state.yamahai) == 70
       assert length(state.rinshanhai) == 4
       assert length(state.wanpai) == 10

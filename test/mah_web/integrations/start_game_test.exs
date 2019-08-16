@@ -29,19 +29,12 @@ defmodule MahWeb.StartGameTest do
       Phoenix.ChannelTest.push(socket2, "ready", %{})
       Phoenix.ChannelTest.push(socket3, "ready", %{})
       Phoenix.ChannelTest.push(socket4, "ready", %{})
-
       :timer.sleep(100)
-      {:messages, messages} = :erlang.process_info(self(), :messages)
 
-      %{payload: %{players: players = [chicha | except_chicha]}} =
-        Enum.find(messages, fn
-          %{event: "game:start"} -> true
-          _else -> false
-        end)
+      [%{payload: %{players: players = [chicha | except_chicha]}} | _] = game_events("game:start")
 
       assertions =
-        messages
-        |> Enum.map(fn
+        Enum.map(game_events(), fn
           %{event: "game:start", payload: payload} ->
             assert length(payload.hand.tehai) == 13
             assert payload.hand.sutehai == []
@@ -53,13 +46,21 @@ defmodule MahWeb.StartGameTest do
 
           %{event: "game:tacha_tsumo", topic: topic} ->
             assert topic in Enum.map(except_chicha, &"user:#{&1}")
-
-          _ ->
-            nil
         end)
-        |> Enum.filter(& &1)
 
       assert length(assertions) == 8
+
+      [%{payload: %{tsumohai: tsumohai}, topic: topic = "user:" <> user_id}] = game_events("game:tsumo")
+
+      [socket1, socket2, socket3, socket4]
+      |> Enum.find(fn socket -> socket.id == topic end)
+      |> Phoenix.ChannelTest.push("dahai", %{hai: tsumohai})
+
+      Enum.each(game_events("game:dahai"), fn %{payload: payload} ->
+        assert Map.get(payload, :hai) == tsumohai
+        assert Map.get(payload, :tsumogiri) == true
+        assert Map.get(payload, :player) == user_id
+      end)
     end
   end
 
@@ -73,5 +74,19 @@ defmodule MahWeb.StartGameTest do
     MahWeb.UserSocket
     |> Phoenix.ChannelTest.socket("user:#{player.id}", %{user_id: player.id})
     |> Phoenix.ChannelTest.subscribe_and_join(MahWeb.GameChannel, "game:#{game_id}")
+  end
+
+  defp game_events(event \\ nil) do
+    {:messages, messages} = :erlang.process_info(self(), :messages)
+
+    messages
+    |> Enum.filter(&is_map(&1))
+    |> Enum.filter(fn map ->
+      if event do
+        Map.get(map, :event) == event
+      else
+        Map.get(map, :event) |> String.starts_with?("game:")
+      end
+    end)
   end
 end
