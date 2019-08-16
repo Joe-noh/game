@@ -97,9 +97,9 @@ defmodule Mah.Game.Server do
   end
 
   def handle_event({:call, from}, :start_game, :startable, game) do
-    {:ok, game = %{players: players, tsumo_player_index: tsumo_player_index}} = State.haipai(game)
+    {:ok, game = %{players: players, tsumo_player: tsumo_player}} = State.haipai(game)
     {:ok, game = %{tsumohai: tsumohai}} = State.tsumo(game)
-    reply = %{player: Enum.at(players, tsumo_player_index), tsumohai: tsumohai}
+    reply = %{player: tsumo_player, tsumohai: tsumohai}
 
     {:next_state, :wait_for_dahai, game, {:reply, from, {:ok, reply}}}
   end
@@ -109,9 +109,9 @@ defmodule Mah.Game.Server do
   end
 
   def handle_event({:call, from}, :next_tsumo, :tsumoban, game = %{players: players}) do
-    {:ok, game = %{tsumo_player_index: tsumo_player_index}} = State.proceed_tsumoban(game)
+    {:ok, game = %{tsumo_player: tsumo_player}} = State.proceed_tsumoban(game)
     {:ok, game = %{tsumohai: tsumohai}} = State.tsumo(game)
-    reply = %{player: Enum.at(players, tsumo_player_index), tsumohai: tsumohai}
+    reply = %{player: tsumo_player, tsumohai: tsumohai}
 
     {:next_state, :wait_for_dahai, game, {:reply, from, {:ok, reply}}}
   end

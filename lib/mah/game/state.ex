@@ -6,7 +6,7 @@ defmodule Mah.Game.State do
             ready: [],
             honba: 0,
             round: 1,
-            tsumo_player_index: 0,
+            tsumo_player: nil,
             tsumohai: nil,
             hands: %{},
             yamahai: [],
@@ -70,7 +70,7 @@ defmodule Mah.Game.State do
     {wanpai, tiles} = Enum.split(tiles, 10)
 
     # 席順 (東南西北)
-    players = Enum.shuffle(players)
+    players = [tsumo_player | _] = Enum.shuffle(players)
 
     hands =
       Enum.chunk_every(tiles, 13)
@@ -79,12 +79,14 @@ defmodule Mah.Game.State do
         Map.put(acc, player, %{tehai: tehai, furo: [], sutehai: []})
       end)
 
-    %__MODULE__{game | players: players, hands: hands, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai}
+    %__MODULE__{game | players: players, tsumo_player: tsumo_player, hands: hands, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai}
   end
 
-  def proceed_tsumoban(game = %__MODULE__{players: players, tsumo_player_index: tsumo_player_index}) do
-    next_tsumo_player_index = rem(tsumo_player_index + 1, length(players))
-    {:ok, %__MODULE__{game | tsumo_player_index: next_tsumo_player_index}}
+  def proceed_tsumoban(game = %__MODULE__{players: players, tsumo_player: tsumo_player}) do
+    tsumo_player_index = Enum.find_index(players, & &1 == tsumo_player)
+    next_tsumo_player = rem(tsumo_player_index + 1, length(players))
+
+    {:ok, %__MODULE__{game | tsumo_player: next_tsumo_player}}
   end
 
   def tsumo(game = %__MODULE__{yamahai: yamahai}) do
@@ -93,19 +95,19 @@ defmodule Mah.Game.State do
     {:ok, %__MODULE__{game | tsumohai: tsumohai, yamahai: yamahai}}
   end
 
-  def dahai(game = %__MODULE__{players: players, hands: hands, tsumo_player_index: tsumo_player_index, tsumohai: tsumohai}, player_id, hai) do
-    if player_id == Enum.at(players, tsumo_player_index) do
-      if hai in get_in(hands, [player_id, :tehai]) || hai == tsumohai do
-        hands = update_hands(hands, player_id, hai, tsumohai)
-        game = %__MODULE__{game | tsumohai: nil, hands: hands}
+  def dahai(game = %__MODULE__{hands: hands, tsumo_player: player_id, tsumohai: tsumohai}, player_id, hai) do
+    if hai in get_in(hands, [player_id, :tehai]) || hai == tsumohai do
+      hands = update_hands(hands, player_id, hai, tsumohai)
+      game = %__MODULE__{game | tsumohai: nil, hands: hands}
 
-        {:ok, game}
-      else
-        {:error, :not_in_your_hand}
-      end
+      {:ok, game}
     else
-      {:error, :not_your_turn}
+      {:error, :not_in_your_hand}
     end
+  end
+
+  def dahai(%__MODULE__{tsumo_player: tsumo_player}, player_id, _hai) when tsumo_player != player_id do
+    {:error, :not_your_turn}
   end
 
   defp update_hands(hands, player_id, dahai, tsumohai) do
