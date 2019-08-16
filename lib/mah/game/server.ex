@@ -17,6 +17,10 @@ defmodule Mah.Game.Server do
     GenStateMachine.call(via_tuple(id), {:add_player, player_id})
   end
 
+  def player_ready(id, player_id) do
+    GenStateMachine.call(via_tuple(id), {:player_ready, player_id})
+  end
+
   def startable_with?(id, players) do
     GenStateMachine.call(via_tuple(id), {:startable_with?, players})
   end
@@ -36,15 +40,11 @@ defmodule Mah.Game.Server do
 
   def handle_event({:call, from}, {:add_player, player_id}, :wait_for_players, game) do
     case State.add_player(game, player_id) do
-      error = {:error, :already_joined} ->
+      error = {:error, _} ->
         {:keep_state_and_data, {:reply, from, error}}
 
       {:ok, game} ->
-        if State.startable?(game) do
-          {:next_state, :startable, game, {:reply, from, {:ok, :startable}}}
-        else
-          {:keep_state, game, {:reply, from, {:ok, :waiting}}}
-        end
+        {:keep_state, game, {:reply, from, {:ok, :waiting}}}
     end
   end
 
@@ -52,8 +52,26 @@ defmodule Mah.Game.Server do
     {:keep_state_and_data, {:reply, from, {:error, :full}}}
   end
 
-  def handle_event({:call, from}, {:startable_with?, players}, :startable, game) do
-    {:keep_state_and_data, {:reply, from, Enum.sort(game.players) == Enum.sort(players)}}
+  def handle_event({:call, from}, {:player_ready, player_id}, :wait_for_players, game) do
+    case State.player_ready(game, player_id) do
+      {:ok, game} ->
+        if State.startable?(game) do
+          {:next_state, :startable, game, {:reply, from, {:ok, :startable}}}
+        else
+          {:keep_state, game, {:reply, from, {:ok, :waiting}}}
+        end
+
+      error = {:error, _} ->
+        {:keep_state_and_data, {:reply, from, error}}
+    end
+  end
+
+  def handle_event({:call, from}, {:player_ready, _}, _other, _game) do
+    {:keep_state_and_data, {:reply, from, {:error, :unacceptable}}}
+  end
+
+  def handle_event({:call, from}, {:startable_with?, players}, :startable, %{ready: ready}) do
+    {:keep_state_and_data, {:reply, from, Enum.sort(ready) == Enum.sort(players)}}
   end
 
   def handle_event({:call, from}, {:startable_with?, _players}, _other, _game) do

@@ -5,7 +5,7 @@ defmodule Mah.Game.StateTest do
 
   setup do
     state = GameState.new("game-id")
-    state = %GameState{state | players: ~w[p1 p2 p3 p4]}
+    state = %GameState{state | players: ~w[p1 p2 p3 p4], ready: ~w[p1 p2 p3 p4]}
 
     %{state: state}
   end
@@ -25,7 +25,7 @@ defmodule Mah.Game.StateTest do
     end
 
     test "returns false when there are not enough players", %{state: state} do
-      assert false == GameState.startable?(%GameState{state | players: ~w[p1 p2 p3]})
+      assert false == GameState.startable?(%GameState{state | ready: ~w[p1 p2 p3]})
     end
   end
 
