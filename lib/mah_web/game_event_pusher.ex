@@ -17,6 +17,12 @@ defmodule MahWeb.GameEventPusher do
     end)
   end
 
+  def dahai(%{player: player_id, players: players, hai: hai, tsumogiri: tsumogiri}) do
+    Enum.each(players, fn player ->
+      push(player, "game:dahai", %{player: player_id, hai: hai, tsumogiri: tsumogiri})
+    end)
+  end
+
   @spec push(player_id :: String.t(), event :: String.t(), payload :: map()) :: :ok | no_return()
   defp push(player_id, event, payload) do
     MahWeb.Endpoint.broadcast!("user:#{player_id}", event, payload)

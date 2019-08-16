@@ -19,6 +19,16 @@ defmodule MahWeb.GameChannel do
     {:noreply, socket}
   end
 
+  def handle_in("dahai", %{"hai" => hai}, socket = %{assigns: %{user_id: user_id, game_id: game_id}}) do
+    case Mah.Game.dahai(game_id, user_id, hai) do
+      :ok ->
+        {:reply, {:ok, %{ok: true}}, socket}
+
+      {:error, reason} ->
+        {:reply, {:ok, %{ok: false, reason: reason}}, socket}
+    end
+  end
+
   def handle_info(:track_presence, socket) do
     push(socket, "presence_state", MahWeb.Presence.list(socket))
     {:ok, _} = MahWeb.Presence.track(socket, socket.assigns.user_id, %{})
