@@ -32,7 +32,8 @@ defmodule MahWeb.GameChannel do
         {:ok, players} = Mah.Game.players(game_id)
         EventPusher.dahai(%{player: user_id, players: players, hai: hai, tsumogiri: tsumogiri})
 
-        actions = [] # Mah.Game.possible_actions(game_id)
+        # TODO: Mah.Game.possible_actions(game_id)
+        actions = []
 
         if actions == [] do
           {:ok, %{player: player, tsumohai: tsumohai}} = Mah.Game.next_tsumo(game_id)
@@ -40,7 +41,9 @@ defmodule MahWeb.GameChannel do
 
           {:noreply, socket}
         else
-          Enum.each(actions, fn _ -> nil end) # push actions, not implemented
+          # TODO: push actions, not implemented
+          Enum.each(actions, fn _ -> nil end)
+
           {:noreply, socket}
         end
 
