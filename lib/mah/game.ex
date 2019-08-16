@@ -14,4 +14,5 @@ defmodule Mah.Game do
   defdelegate player_ready(game_id, player_id), to: Mah.Game.Server
   defdelegate start_game(game_id), to: Mah.Game.Server
   defdelegate startable_with?(game_id, player_ids), to: Mah.Game.Server
+  defdelegate dahai(game_id, player_id, hai), to: Mah.Game.Server
 end

@@ -76,36 +76,13 @@ defmodule Mah.Game.State do
     {:ok, %__MODULE__{game | tsumohai: tsumohai, yamahai: yamahai}}
   end
 
-  def tsumogiri(game = %__MODULE__{players: players, hands: hands, tsumo_player_index: tsumo_player_index, tsumohai: tsumohai}, player_id) do
-    if player_id == players[tsumo_player_index] do
-      hands =
-        Map.update!(hands, player_id, fn hand = %{sutehai: sutehai} ->
-          Map.put(hand, :sutehai, [%{hai: tsumohai, tsumogiri: true} | sutehai])
-        end)
+  def dahai(game = %__MODULE__{players: players, hands: hands, tsumo_player_index: tsumo_player_index, tsumohai: tsumohai}, player_id, hai) do
+    if player_id == Enum.at(players, tsumo_player_index) do
+      if hai in get_in(hands, [player_id, :tehai]) || hai == tsumohai do
+        hands = update_hands(hands, player_id, hai, tsumohai)
 
-      # TODO: check can anyone furo
-
-      next_tsumo_player_index = rem(tsumo_player_index + 1, length(players))
-      game = %__MODULE__{game | tsumohai: nil, tsumo_player_index: next_tsumo_player_index, hands: hands}
-
-      {:ok, game}
-    else
-      {:error, :not_your_turn}
-    end
-  end
-
-  def dahai(game = %__MODULE__{players: players, hands: hands, tsumo_player_index: tsumo_player_index, tsumohai: tsumohai}, player_id, dahai) do
-    if player_id == players[tsumo_player_index] do
-      if dahai in get_in(hands, [player_id, :tehai]) do
-        hands =
-          Map.update!(hands, player_id, fn hand = %{tehai: tehai, sutehai: sutehai} ->
-            hand
-            |> Map.put(:sutehai, [%{hai: dahai, tsumogiri: false} | sutehai])
-            |> Map.put(:tehai, [tsumohai | Enum.reject(tehai, &(&1 == dahai))])
-          end)
-
-        next_tsumo_player_index = rem(tsumo_player_index + 1, length(players))
-        game = %__MODULE__{game | tsumohai: nil, tsumo_player_index: next_tsumo_player_index, hands: hands}
+        game = next_player(game)
+        game = %__MODULE__{game | tsumohai: nil, hands: hands}
 
         {:ok, game}
       else
@@ -114,5 +91,22 @@ defmodule Mah.Game.State do
     else
       {:error, :not_your_turn}
     end
+  end
+
+  defp update_hands(hands, player_id, dahai, tsumohai) do
+    Map.update!(hands, player_id, fn hand = %{tehai: tehai, sutehai: sutehai} ->
+      hand
+      |> Map.put(:sutehai, [%{hai: dahai, tsumogiri: dahai == tsumohai} | sutehai])
+      |> Map.put(:tehai, Enum.reject([tsumohai | tehai], &(&1 == dahai)))
+    end)
+  end
+
+  defp next_player(game = %__MODULE__{players: players, tsumo_player_index: tsumo_player_index}) do
+    next_tsumo_player_index = rem(tsumo_player_index + 1, length(players))
+    %__MODULE__{game | tsumo_player_index: next_tsumo_player_index}
+  end
+
+  def last_dahai(%__MODULE__{hands: hands}, player_id) do
+    hands |> get_in([player_id, :sutehai]) |> List.first()
   end
 end

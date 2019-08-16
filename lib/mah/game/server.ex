@@ -29,8 +29,8 @@ defmodule Mah.Game.Server do
     GenStateMachine.cast(via_tuple(id), :start_game)
   end
 
-  def dahai(id, player_id, dahai) do
-    GenStateMachine.call(via_tuple(id), {:dahai, player_id, dahai})
+  def dahai(id, player_id, hai) do
+    GenStateMachine.call(via_tuple(id), {:dahai, player_id, hai})
   end
 
   def init(id) do
@@ -102,16 +102,19 @@ defmodule Mah.Game.Server do
     {:next_state, :wait_for_dahai, game}
   end
 
-  def handle_event({:call, from}, {:dahai, player_id, dahai}, :wait_for_dahai, game = %{tsumohai: dahai}) do
-    {:ok, game} = State.tsumogiri(game, player_id)
+  def handle_event({:call, from}, {:dahai, player_id, hai}, :wait_for_dahai, game) do
+    case State.dahai(game, player_id, hai) do
+      {:ok, game} ->
+        game
+        |> State.last_dahai(player_id)
+        |> Map.merge(%{player: player_id, players: game.players})
+        |> MahWeb.GameEventPusher.dahai()
 
-    {:next_state, :tsumoban, game, [{:reply, from, :ok}, {:next_event, :internal, :tsumo}]}
-  end
+        {:next_state, :tsumoban, game, [{:reply, from, :ok}, {:next_event, :internal, :tsumo}]}
 
-  def handle_event({:call, from}, {:dahai, player_id, dahai}, :wait_for_dahai, game) do
-    {:ok, game} = State.dahai(game, player_id, dahai)
-
-    {:next_state, :tsumoban, game, [{:reply, from, :ok}, {:next_event, :internal, :tsumo}]}
+      error = {:error, _reason} ->
+        {:keep_state_and_data, {:reply, from, error}}
+    end
   end
 
   def handle_event(:info, {:EXIT, _pid, :shutdown}, _state, _game) do
