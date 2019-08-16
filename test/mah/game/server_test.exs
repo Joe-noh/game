@@ -15,7 +15,7 @@ defmodule Mah.Game.ServerTest do
     assert {:ok, :waiting} == Server.add_player(@game_id, "p2")
     assert {:ok, :waiting} == Server.add_player(@game_id, "p3")
     assert {:error, :already_joined} == Server.add_player(@game_id, "p3")
-    assert {:ok, :startable} == Server.add_player(@game_id, "p4")
+    assert {:ok, :waiting} == Server.add_player(@game_id, "p4")
 
     assert :ok = Server.start_game(@game_id)
   end

@@ -15,15 +15,20 @@ defmodule MahWeb.StartGameTest do
       assert %{"data" => %{"game_id" => ^game_id}} = participate_game(conn3)
       assert %{"data" => %{"game_id" => ^game_id}} = participate_game(conn4)
 
-      {:ok, _, %{id: topic1}} = connect_socket(p1, game_id)
-      {:ok, _, %{id: topic2}} = connect_socket(p2, game_id)
-      {:ok, _, %{id: topic3}} = connect_socket(p3, game_id)
-      {:ok, _, %{id: topic4}} = connect_socket(p4, game_id)
+      {:ok, _, socket1 = %{id: topic1}} = connect_socket(p1, game_id)
+      {:ok, _, socket2 = %{id: topic2}} = connect_socket(p2, game_id)
+      {:ok, _, socket3 = %{id: topic3}} = connect_socket(p3, game_id)
+      {:ok, _, socket4 = %{id: topic4}} = connect_socket(p4, game_id)
 
       @endpoint.subscribe(topic1)
       @endpoint.subscribe(topic2)
       @endpoint.subscribe(topic3)
       @endpoint.subscribe(topic4)
+
+      Phoenix.ChannelTest.push(socket1, "ready", %{})
+      Phoenix.ChannelTest.push(socket2, "ready", %{})
+      Phoenix.ChannelTest.push(socket3, "ready", %{})
+      Phoenix.ChannelTest.push(socket4, "ready", %{})
 
       :timer.sleep(100)
       {:messages, messages} = :erlang.process_info(self(), :messages)

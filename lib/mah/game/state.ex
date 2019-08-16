@@ -3,6 +3,7 @@ defmodule Mah.Game.State do
 
   defstruct id: nil,
             players: [],
+            ready: [],
             honba: 0,
             round: 1,
             tsumo_player_index: 0,
@@ -17,15 +18,28 @@ defmodule Mah.Game.State do
   end
 
   def add_player(game = %__MODULE__{players: players}, player_id) do
-    if player_id in players do
-      {:error, :already_joined}
-    else
-      {:ok, %__MODULE__{game | players: [player_id | players]}}
+    cond do
+      length(players) == 4 ->
+        {:error, :full}
+
+      player_id in players ->
+        {:error, :already_joined}
+
+      true ->
+        {:ok, %__MODULE__{game | players: [player_id | players]}}
     end
   end
 
-  def startable?(%__MODULE__{players: players}) do
-    length(players) == 4
+  def player_ready(game = %__MODULE__{players: players, ready: ready}, player_id) do
+    if player_id in players do
+      {:ok, %__MODULE__{game | ready: Enum.dedup([player_id | ready])}}
+    else
+      {:error, :not_joined}
+    end
+  end
+
+  def startable?(%__MODULE__{players: players, ready: ready}) do
+    length(players) == 4 && length(ready) == 4
   end
 
   def haipai(game) do
