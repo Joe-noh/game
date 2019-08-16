@@ -17,6 +17,18 @@ defmodule Mah.Game.State do
     %__MODULE__{id: id}
   end
 
+  # queries
+
+  def players(%__MODULE__{players: players}), do: players
+
+  def hands(%__MODULE__{hands: hands}), do: hands
+
+  def last_dahai(%__MODULE__{hands: hands}, player_id) do
+    hands |> get_in([player_id, :sutehai]) |> List.first()
+  end
+
+  # commands
+
   def add_player(game = %__MODULE__{players: players}, player_id) do
     cond do
       length(players) == 4 ->
@@ -70,8 +82,13 @@ defmodule Mah.Game.State do
     %__MODULE__{game | players: players, hands: hands, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai}
   end
 
-  def tsumo(game) do
-    [tsumohai | yamahai] = game.yamahai
+  def proceed_tsumoban(game = %__MODULE__{players: players, tsumo_player_index: tsumo_player_index}) do
+    next_tsumo_player_index = rem(tsumo_player_index + 1, length(players))
+    {:ok, %__MODULE__{game | tsumo_player_index: next_tsumo_player_index}}
+  end
+
+  def tsumo(game = %__MODULE__{yamahai: yamahai}) do
+    [tsumohai | yamahai] = yamahai
 
     {:ok, %__MODULE__{game | tsumohai: tsumohai, yamahai: yamahai}}
   end
@@ -80,8 +97,6 @@ defmodule Mah.Game.State do
     if player_id == Enum.at(players, tsumo_player_index) do
       if hai in get_in(hands, [player_id, :tehai]) || hai == tsumohai do
         hands = update_hands(hands, player_id, hai, tsumohai)
-
-        game = next_player(game)
         game = %__MODULE__{game | tsumohai: nil, hands: hands}
 
         {:ok, game}
@@ -99,14 +114,5 @@ defmodule Mah.Game.State do
       |> Map.put(:sutehai, [%{hai: dahai, tsumogiri: dahai == tsumohai} | sutehai])
       |> Map.put(:tehai, Enum.reject([tsumohai | tehai], &(&1 == dahai)))
     end)
-  end
-
-  defp next_player(game = %__MODULE__{players: players, tsumo_player_index: tsumo_player_index}) do
-    next_tsumo_player_index = rem(tsumo_player_index + 1, length(players))
-    %__MODULE__{game | tsumo_player_index: next_tsumo_player_index}
-  end
-
-  def last_dahai(%__MODULE__{hands: hands}, player_id) do
-    hands |> get_in([player_id, :sutehai]) |> List.first()
   end
 end

@@ -12,7 +12,15 @@ defmodule MahWeb.GameChannel do
       players = MahWeb.Presence.list(socket) |> Map.keys()
 
       if Mah.Game.startable_with?(game_id, players) do
-        Mah.Game.start_game(game_id)
+        {:ok, %{player: player, tsumohai: tsumohai}} = Mah.Game.start_game(game_id)
+        {:ok, players} = Mah.Game.players(game_id)
+        {:ok, hands} = Mah.Game.hands(game_id)
+
+        Enum.each(players, fn player ->
+          MahWeb.GameEventPusher.game_start(player, %{players: players, hand: Map.get(hands, player)})
+        end)
+
+        MahWeb.GameEventPusher.tsumo(player, %{tsumohai: tsumohai, other_players: Enum.reject(players, & &1 == player)})
       end
     end
 
@@ -21,8 +29,21 @@ defmodule MahWeb.GameChannel do
 
   def handle_in("dahai", %{"hai" => hai}, socket = %{assigns: %{user_id: user_id, game_id: game_id}}) do
     case Mah.Game.dahai(game_id, user_id, hai) do
-      :ok ->
-        {:reply, {:ok, %{ok: true}}, socket}
+      {:ok, %{hai: hai, tsumogiri: tsumogiri}} ->
+        {:ok, players} = Mah.Game.players(game_id)
+        MahWeb.GameEventPusher.dahai(%{player: user_id, players: players, hai: hai, tsumogiri: tsumogiri})
+
+        actions = [] # Mah.Game.possible_actions(game_id)
+
+        if actions == [] do
+          {:ok, %{player: player, tsumohai: tsumohai}} = Mah.Game.next_tsumo(game_id)
+          MahWeb.GameEventPusher.tsumo(player, %{tsumohai: tsumohai, other_players: Enum.reject(players, & &1 == player)})
+
+          {:noreply, socket}
+        else
+          Enum.each(actions, fn _ -> nil end) # push actions, not implemented
+          {:noreply, socket}
+        end
 
       {:error, reason} ->
         {:reply, {:ok, %{ok: false, reason: reason}}, socket}

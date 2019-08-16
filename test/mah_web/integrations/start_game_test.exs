@@ -51,11 +51,10 @@ defmodule MahWeb.StartGameTest do
       assert length(assertions) == 8
 
       [%{payload: %{tsumohai: tsumohai}, topic: topic = "user:" <> user_id}] = game_events("game:tsumo")
-      socket = Enum.find([socket1, socket2, socket3, socket4], fn socket -> socket.id == topic end)
 
-      socket
+      [socket1, socket2, socket3, socket4]
+      |> Enum.find(fn socket -> socket.id == topic end)
       |> Phoenix.ChannelTest.push("dahai", %{hai: tsumohai})
-      |> Phoenix.ChannelTest.assert_reply(:ok, %{ok: true})
 
       Enum.each(game_events("game:dahai"), fn %{payload: payload} ->
         assert Map.get(payload, :hai) == tsumohai

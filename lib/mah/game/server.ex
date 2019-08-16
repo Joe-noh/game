@@ -13,6 +13,16 @@ defmodule Mah.Game.Server do
     GenStateMachine.start_link(__MODULE__, id, name: via_tuple(id))
   end
 
+  def players(id) do
+    {:ok, game} = GenStateMachine.call(via_tuple(id), :game_state)
+    {:ok, State.players(game)}
+  end
+
+  def hands(id) do
+    {:ok, game} = GenStateMachine.call(via_tuple(id), :game_state)
+    {:ok, State.hands(game)}
+  end
+
   def add_player(id, player_id) do
     GenStateMachine.call(via_tuple(id), {:add_player, player_id})
   end
@@ -26,16 +36,24 @@ defmodule Mah.Game.Server do
   end
 
   def start_game(id) do
-    GenStateMachine.cast(via_tuple(id), :start_game)
+    GenStateMachine.call(via_tuple(id), :start_game)
   end
 
   def dahai(id, player_id, hai) do
     GenStateMachine.call(via_tuple(id), {:dahai, player_id, hai})
   end
 
+  def next_tsumo(id) do
+    GenStateMachine.call(via_tuple(id), :next_tsumo)
+  end
+
   def init(id) do
     Process.flag(:trap_exit, true)
     {:ok, :wait_for_players, State.new(id)}
+  end
+
+  def handle_event({:call, from}, :game_state, _, game) do
+    {:keep_state_and_data, {:reply, from, {:ok, game}}}
   end
 
   def handle_event({:call, from}, {:add_player, player_id}, :wait_for_players, game) do
@@ -78,39 +96,31 @@ defmodule Mah.Game.Server do
     {:keep_state_and_data, {:reply, from, false}}
   end
 
-  def handle_event(:cast, :start_game, :startable, game) do
+  def handle_event({:call, from}, :start_game, :startable, game) do
     {:ok, game = %{players: players, hands: hands}} = State.haipai(game)
+    {:ok, game = %{tsumohai: tsumohai, tsumo_player_index: tsumo_player_index}} = State.tsumo(game)
+    reply = %{player: Enum.at(players, tsumo_player_index), tsumohai: tsumohai}
 
-    Enum.each(players, fn player ->
-      hand = Map.get(hands, player)
-      MahWeb.GameEventPusher.game_start(player, %{players: players, hand: hand})
-    end)
-
-    {:next_state, :tsumoban, game, {:next_event, :internal, :tsumo}}
+    {:next_state, :wait_for_dahai, game, {:reply, from, {:ok, reply}}}
   end
 
-  def handle_event(:cast, :start_game, _other, _game) do
-    :keep_state_and_data
+  def handle_event({:call, from}, :start_game, _other, _game) do
+    {:keep_state_and_data, {:reply, from, {:error, :unstartable}}}
   end
 
-  def handle_event(:internal, :tsumo, :tsumoban, game = %{players: players, tsumo_player_index: tsumo_player_index}) do
-    {tsumo_player, other_players} = List.pop_at(players, tsumo_player_index)
-    {:ok, game = %{tsumohai: tsumohai, yamahai: _yamahai}} = State.tsumo(game)
+  def handle_event({:call, from}, :next_tsumo, :tsumoban, game = %{players: players}) do
+    {:ok, game = %{tsumo_player_index: tsumo_player_index}} = State.proceed_tsumoban(game)
+    {:ok, game = %{tsumohai: tsumohai}} = State.tsumo(game)
+    reply = %{player: Enum.at(players, tsumo_player_index), tsumohai: tsumohai}
 
-    MahWeb.GameEventPusher.tsumo(tsumo_player, %{tsumohai: tsumohai, other_players: other_players})
-
-    {:next_state, :wait_for_dahai, game}
+    {:next_state, :wait_for_dahai, game, {:reply, from, {:ok, reply}}}
   end
 
   def handle_event({:call, from}, {:dahai, player_id, hai}, :wait_for_dahai, game) do
     case State.dahai(game, player_id, hai) do
       {:ok, game} ->
-        game
-        |> State.last_dahai(player_id)
-        |> Map.merge(%{player: player_id, players: game.players})
-        |> MahWeb.GameEventPusher.dahai()
-
-        {:next_state, :tsumoban, game, [{:reply, from, :ok}, {:next_event, :internal, :tsumo}]}
+        reply = State.last_dahai(game, player_id) |> Map.put(:actions, [])
+        {:next_state, :tsumoban, game, {:reply, from, {:ok, reply}}}
 
       error = {:error, _reason} ->
         {:keep_state_and_data, {:reply, from, error}}
