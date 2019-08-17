@@ -83,10 +83,11 @@ defmodule Mah.Game.State do
   end
 
   def proceed_tsumoban(game = %__MODULE__{players: players, tsumo_player: tsumo_player}) do
-    tsumo_player_index = Enum.find_index(players, & &1 == tsumo_player)
-    next_tsumo_player = rem(tsumo_player_index + 1, length(players))
+    current_player_index = Enum.find_index(players, &(&1 == tsumo_player))
+    next_player_index = rem(current_player_index + 1, length(players))
+    next_player = Enum.at(players, next_player_index)
 
-    {:ok, %__MODULE__{game | tsumo_player: next_tsumo_player}}
+    {:ok, %__MODULE__{game | tsumo_player: next_player}}
   end
 
   def tsumo(game = %__MODULE__{yamahai: yamahai}) do
