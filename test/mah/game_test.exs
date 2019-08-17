@@ -79,4 +79,26 @@ defmodule Mah.GameTest do
       assert {:wait_for_players, _game} = :sys.get_state(pid, 1000)
     end
   end
+
+  describe "next_tsumo/1" do
+    setup do
+      {:ok, pid, game_id} = Mah.Game.spawn_new_game()
+
+      Enum.each(~w[p1 p2 p3 p4], fn p ->
+        Mah.Game.add_player(game_id, p)
+        Mah.Game.player_ready(game_id, p)
+      end)
+
+      {:ok, %{player: player, tsumohai: tsumohai}} = Mah.Game.start_game(game_id)
+      Mah.Game.dahai(game_id, player, tsumohai)
+
+      %{game_id: game_id, pid: pid}
+    end
+
+    test "proceed tsumoban and pick a tile", %{game_id: game_id, pid: pid} do
+      {:tsumoban, %{tsumo_player: a, players: [a, b, _, _], yamahai: [tsumohai | _]}} = :sys.get_state(pid, 1000)
+
+      assert {:ok, %{tsumohai: tsumohai, player: b}} == Mah.Game.next_tsumo(game_id)
+    end
+  end
 end
