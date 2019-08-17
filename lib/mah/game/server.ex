@@ -116,6 +116,10 @@ defmodule Mah.Game.Server do
     {:next_state, :wait_for_dahai, game, {:reply, from, {:ok, reply}}}
   end
 
+  def handle_event({:call, from}, :next_tsumo, _other, _game) do
+    {:keep_state_and_data, {:reply, from, {:error, :unacceptable}}}
+  end
+
   def handle_event({:call, from}, {:dahai, player_id, hai}, :wait_for_dahai, game) do
     case State.dahai(game, player_id, hai) do
       {:ok, game} ->
