@@ -2,7 +2,7 @@ defmodule Mah.Matching.Server do
   use GenServer
 
   defmodule State do
-    defstruct unstarted_games: []
+    defstruct unstarted_games: [], game_id_dict: %{}
 
     def new do
       %__MODULE__{}
@@ -23,16 +23,27 @@ defmodule Mah.Matching.Server do
     {:ok, State.new()}
   end
 
-  def handle_call({:start_or_join, player_id}, _from, state = %{unstarted_games: []}) do
-    {:ok, pid, game_id} = Mah.Game.spawn_new_game()
-    Mah.Game.add_player(game_id, player_id)
+  def handle_call({:start_or_join, player_id}, _from, state = %{game_id_dict: game_id_dict}) do
+    case Map.get(game_id_dict, player_id) do
+      nil ->
+        handle_start_or_join(player_id, state)
 
-    ref = Process.monitor(pid)
-
-    {:reply, {:ok, game_id}, %State{state | unstarted_games: [{game_id, ref}]}}
+      game_id ->
+        {:reply, {:ok, game_id}, state}
+    end
   end
 
-  def handle_call({:start_or_join, player_id}, _from, state = %{unstarted_games: unstarted_games}) do
+  defp handle_start_or_join(player_id, state = %{unstarted_games: [], game_id_dict: game_id_dict}) do
+    {:ok, pid, game_id} = Mah.Game.spawn_new_game()
+    {:ok, :waiting} = Mah.Game.add_player(game_id, player_id)
+
+    ref = Process.monitor(pid)
+    dict = Map.put(game_id_dict, player_id, game_id)
+
+    {:reply, {:ok, game_id}, %State{state | unstarted_games: [{game_id, ref}], game_id_dict: dict}}
+  end
+
+  defp handle_start_or_join(player_id, state = %{unstarted_games: unstarted_games, game_id_dict: game_id_dict}) do
     [{game_id, ref} | rest] = unstarted_games
 
     case Mah.Game.add_player(game_id, player_id) do
@@ -44,10 +55,12 @@ defmodule Mah.Matching.Server do
 
       {:ok, :startable} ->
         Process.demonitor(ref)
-        {:reply, {:ok, game_id}, state}
+        dict = Map.put(game_id_dict, player_id, game_id)
+        {:reply, {:ok, game_id}, %State{state | game_id_dict: dict}}
 
       {:ok, :waiting} ->
-        {:reply, {:ok, game_id}, state}
+        dict = Map.put(game_id_dict, player_id, game_id)
+        {:reply, {:ok, game_id}, %State{state | game_id_dict: dict}}
     end
   end
 end
