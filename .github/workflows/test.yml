@@ -1,0 +1,23 @@
+name: mix test
+on: push
+jobs:
+  testing:
+    runs-on: ubuntu-latest
+    container:
+      image: elixir:1.9.1-slim
+    services:
+      postgresql:
+        image: postgresql
+        ports:
+          - 5432/tcp
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install Dependencies
+      run: |
+        mix local.rebar --force
+        mix local.hex --force
+        mix deps.get
+    - name: Setup Database
+      run: mix ecto.setup
+    - name: Run Tests
+      run: mix test
