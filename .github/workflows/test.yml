@@ -6,10 +6,10 @@ jobs:
     container:
       image: elixir:1.9.1-slim
     services:
-      postgresql:
-        image: postgresql
+      postgres:
+        image: postgres
         ports:
-          - 5432/tcp
+        - 5432:5432
     steps:
     - uses: actions/checkout@v1
     - name: Install Dependencies
