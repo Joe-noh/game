@@ -7,6 +7,8 @@ jobs:
       image: elixir:1.9.1-slim
       env:
         MIX_ENV: test
+        DB_HOST: postgres
+        DB_PORT: ${{ job.services.postgres.ports[5432] }}
     services:
       postgres:
         image: postgres
