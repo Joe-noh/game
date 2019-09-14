@@ -18,6 +18,20 @@ defmodule MahWeb.ParticipationControllerTest do
       assert %{"game_id" => _} = json["data"]
     end
 
+    test "duplicated participation returns the same game_id", %{conn: conn} do
+      game_id =
+        conn
+        |> post(Routes.participation_path(conn, :create))
+        |> json_response(201)
+        |> get_in(~w[data game_id])
+
+      ^game_id =
+        conn
+        |> post(Routes.participation_path(conn, :create))
+        |> json_response(201)
+        |> get_in(~w[data game_id])
+    end
+
     test "requires login", %{conn: conn} do
       conn
       |> TestHelpers.logout()
