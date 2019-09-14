@@ -51,7 +51,7 @@ defmodule Mah.Matching.Server do
         {:reply, {:error, :full}, %State{state | unstarted_games: rest}}
 
       {:error, :already_joined} ->
-        {:reply, {:error, :already_joined}, state}
+        {:reply, {:error, :already_joined, game_id}, state}
 
       {:ok, :startable} ->
         Process.demonitor(ref)
