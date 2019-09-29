@@ -4,9 +4,13 @@ defmodule MahWeb.GameChannel do
   alias MahWeb.GameChannel.EventPusher
 
   def join("game:" <> game_id, _payload, socket) do
-    send(self(), :track_presence)
+    if Mah.Game.alive?(game_id) do
+      send(self(), :track_presence)
 
-    {:ok, assign(socket, :game_id, game_id)}
+      {:ok, assign(socket, :game_id, game_id)}
+    else
+      {:error, %{reason: "Game crashed"}}
+    end
   end
 
   def handle_in("ready", _, socket = %{assigns: %{user_id: user_id, game_id: game_id}}) do

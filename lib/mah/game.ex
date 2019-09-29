@@ -12,6 +12,7 @@ defmodule Mah.Game do
 
   defdelegate players(game_id), to: Mah.Game.Server
   defdelegate hands(game_id), to: Mah.Game.Server
+  defdelegate alive?(game_id), to: Mah.Game.Server
   defdelegate add_player(game_id, player_id), to: Mah.Game.Server
   defdelegate player_ready(game_id, player_id), to: Mah.Game.Server
   defdelegate start_game(game_id), to: Mah.Game.Server

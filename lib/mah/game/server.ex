@@ -23,6 +23,14 @@ defmodule Mah.Game.Server do
     {:ok, State.hands(game)}
   end
 
+  def alive?(id) do
+    case Horde.Registry.lookup(via_tuple(id)) do
+      [] -> false
+      :undefined -> false
+      _exists -> true
+    end
+  end
+
   def add_player(id, player_id) do
     GenStateMachine.call(via_tuple(id), {:add_player, player_id})
   end
