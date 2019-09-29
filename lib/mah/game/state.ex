@@ -44,7 +44,8 @@ defmodule Mah.Game.State do
 
   def player_ready(game = %__MODULE__{players: players, ready: ready}, player_id) do
     if player_id in players do
-      {:ok, %__MODULE__{game | ready: Enum.dedup([player_id | ready])}}
+      ready = Enum.uniq([player_id | ready])
+      {:ok, %__MODULE__{game | ready: ready}}
     else
       {:error, :not_joined}
     end
