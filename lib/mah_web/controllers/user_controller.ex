@@ -11,7 +11,7 @@ defmodule MahWeb.UserController do
   end
 
   def create(conn, %{"user" => %{"id_token" => id_token}}) do
-    with {:ok, payload} <- FirebaseJwt.verify(id_token),
+    with {:ok, payload} <- IDToken.verify(id_token, module: IDToken.Firebase),
          {:ok, %{user: user}} <- Identities.signup_with_firebase_payload(payload),
          {:ok, token, _claims} <- MahWeb.Guardian.encode_and_sign(user) do
       conn
