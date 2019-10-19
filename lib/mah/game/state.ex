@@ -6,7 +6,7 @@ defmodule Mah.Game.State do
             ready: [],
             honba: 0,
             round: 1,
-            tsumo_player: nil,
+            tsumoban: nil,
             tsumohai: nil,
             hands: %{},
             yamahai: [],
@@ -71,7 +71,7 @@ defmodule Mah.Game.State do
     {wanpai, tiles} = Enum.split(tiles, 10)
 
     # 席順 (東南西北)
-    players = [tsumo_player | _] = Enum.shuffle(players)
+    players = [tsumoban | _] = Enum.shuffle(players)
 
     hands =
       Enum.chunk_every(tiles, 13)
@@ -80,15 +80,15 @@ defmodule Mah.Game.State do
         Map.put(acc, player, %{tehai: tehai, furo: [], sutehai: []})
       end)
 
-    %__MODULE__{game | players: players, tsumo_player: tsumo_player, hands: hands, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai}
+    %__MODULE__{game | players: players, tsumoban: tsumoban, hands: hands, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai}
   end
 
-  def proceed_tsumoban(game = %__MODULE__{players: players, tsumo_player: tsumo_player}) do
-    current_player_index = Enum.find_index(players, &(&1 == tsumo_player))
+  def proceed_tsumoban(game = %__MODULE__{players: players, tsumoban: tsumoban}) do
+    current_player_index = Enum.find_index(players, &(&1 == tsumoban))
     next_player_index = rem(current_player_index + 1, length(players))
     next_player = Enum.at(players, next_player_index)
 
-    {:ok, %__MODULE__{game | tsumo_player: next_player}}
+    {:ok, %__MODULE__{game | tsumoban: next_player}}
   end
 
   def tsumo(game = %__MODULE__{yamahai: yamahai}) do
@@ -97,7 +97,7 @@ defmodule Mah.Game.State do
     {:ok, %__MODULE__{game | tsumohai: tsumohai, yamahai: yamahai}}
   end
 
-  def dahai(game = %__MODULE__{hands: hands, tsumo_player: player_id, tsumohai: tsumohai}, player_id, hai) do
+  def dahai(game = %__MODULE__{hands: hands, tsumoban: player_id, tsumohai: tsumohai}, player_id, hai) do
     if hai in get_in(hands, [player_id, :tehai]) || hai == tsumohai do
       hands = update_hands(hands, player_id, hai, tsumohai)
       game = %__MODULE__{game | tsumohai: nil, hands: hands}
@@ -108,7 +108,7 @@ defmodule Mah.Game.State do
     end
   end
 
-  def dahai(%__MODULE__{tsumo_player: tsumo_player}, player_id, _hai) when tsumo_player != player_id do
+  def dahai(%__MODULE__{tsumoban: tsumoban}, player_id, _hai) when tsumoban != player_id do
     {:error, :not_your_turn}
   end
 

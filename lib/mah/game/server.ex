@@ -105,9 +105,9 @@ defmodule Mah.Game.Server do
   end
 
   def handle_event({:call, from}, :start_game, :startable, game) do
-    {:ok, game = %{tsumo_player: tsumo_player}} = State.haipai(game)
+    {:ok, game = %{tsumoban: tsumoban}} = State.haipai(game)
     {:ok, game = %{tsumohai: tsumohai}} = State.tsumo(game)
-    reply = %{player: tsumo_player, tsumohai: tsumohai}
+    reply = %{player: tsumoban, tsumohai: tsumohai}
 
     {:next_state, :wait_for_dahai, game, {:reply, from, {:ok, reply}}}
   end
@@ -117,9 +117,9 @@ defmodule Mah.Game.Server do
   end
 
   def handle_event({:call, from}, :next_tsumo, :tsumoban, game) do
-    {:ok, game = %{tsumo_player: tsumo_player}} = State.proceed_tsumoban(game)
+    {:ok, game = %{tsumoban: tsumoban}} = State.proceed_tsumoban(game)
     {:ok, game = %{tsumohai: tsumohai}} = State.tsumo(game)
-    reply = %{player: tsumo_player, tsumohai: tsumohai}
+    reply = %{player: tsumoban, tsumohai: tsumohai}
 
     {:next_state, :wait_for_dahai, game, {:reply, from, {:ok, reply}}}
   end

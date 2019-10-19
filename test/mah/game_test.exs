@@ -96,7 +96,7 @@ defmodule Mah.GameTest do
     end
 
     test "proceed tsumoban and pick a tile", %{game_id: game_id, pid: pid} do
-      {:tsumoban, %{tsumo_player: a, players: [a, b, _, _], yamahai: [tsumohai | _]}} = :sys.get_state(pid, 1000)
+      {:tsumoban, %{tsumoban: a, players: [a, b, _, _], yamahai: [tsumohai | _]}} = :sys.get_state(pid, 1000)
 
       assert {:ok, %{tsumohai: tsumohai, player: b}} == Mah.Game.next_tsumo(game_id)
     end
