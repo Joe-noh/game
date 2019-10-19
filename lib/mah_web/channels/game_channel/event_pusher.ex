@@ -4,9 +4,15 @@ defmodule MahWeb.GameChannel.EventPusher do
   """
 
   @spec game_start(payload :: map()) :: :ok | no_return()
-  def game_start(%{players: players, hands: hands}) do
+  def game_start(%{players: players, hands: %{tehai: tehai, furo: furo, sutehai: sutehai}}) do
     Enum.each(players, fn player ->
-      push(player, "game:start", %{players: players, hand: Map.get(hands, player)})
+      payload = %{
+        players: players,
+        tehai: Map.get(tehai, player),
+        furo: Map.get(furo, player),
+        sutehai: Map.get(sutehai, player)
+      }
+      push(player, "game:start", payload)
     end)
   end
 

@@ -1,6 +1,24 @@
 defmodule Mah.Game.State do
   @all_tile_ids 0..135
 
+  @type player :: String.t()
+  @type tile :: non_neg_integer()
+  @type t :: %{
+    id: String.t() | nil,
+    players: list(player()),
+    ready: list(player()),
+    honba: non_neg_integer(),
+    round: pos_integer(),
+    tsumoban: player() | nil,
+    tsumohai: tile() | nil,
+    tehai: %{required(player()) => list(tile())},
+    furo: %{required(player()) => list(tile())},
+    sutehai: %{required(player()) => list(%{hai: tile(), tsumogiri: bool()})},
+    yamahai: list(tile()),
+    rinshanhai: list(tile()),
+    wanpai: list(tile())
+  }
+
   defstruct id: nil,
             players: [],
             ready: [],
@@ -8,7 +26,9 @@ defmodule Mah.Game.State do
             round: 1,
             tsumoban: nil,
             tsumohai: nil,
-            hands: %{},
+            tehai: %{},
+            furo: %{},
+            sutehai: %{},
             yamahai: [],
             rinshanhai: [],
             wanpai: []
@@ -21,10 +41,10 @@ defmodule Mah.Game.State do
 
   def players(%__MODULE__{players: players}), do: players
 
-  def hands(%__MODULE__{hands: hands}), do: hands
+  def hands(%__MODULE__{tehai: tehai, furo: furo, sutehai: sutehai}), do: %{tehai: tehai, furo: furo, sutehai: sutehai}
 
-  def last_dahai(%__MODULE__{hands: hands}, player_id) do
-    hands |> get_in([player_id, :sutehai]) |> List.first()
+  def last_dahai(%__MODULE__{sutehai: sutehai}, player_id) do
+    sutehai |> Map.get(player_id) |> List.first()
   end
 
   # commands
@@ -73,14 +93,10 @@ defmodule Mah.Game.State do
     # 席順 (東南西北)
     players = [tsumoban | _] = Enum.shuffle(players)
 
-    hands =
-      Enum.chunk_every(tiles, 13)
-      |> Enum.zip(players)
-      |> Enum.reduce(%{}, fn {tehai, player}, acc ->
-        Map.put(acc, player, %{tehai: tehai, furo: [], sutehai: []})
-      end)
+    tehai = players |> Enum.zip(Enum.chunk_every(tiles, 13)) |> Enum.into(%{})
+    empties = players |> Enum.reduce(%{}, &Map.put(&2, &1, []))
 
-    %__MODULE__{game | players: players, tsumoban: tsumoban, hands: hands, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai}
+    %__MODULE__{game | players: players, tsumoban: tsumoban, tehai: tehai, furo: empties, sutehai: empties, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai}
   end
 
   def proceed_tsumoban(game = %__MODULE__{players: players, tsumoban: tsumoban}) do
@@ -97,26 +113,26 @@ defmodule Mah.Game.State do
     {:ok, %__MODULE__{game | tsumohai: tsumohai, yamahai: yamahai}}
   end
 
-  def dahai(game = %__MODULE__{hands: hands, tsumoban: player_id, tsumohai: tsumohai}, player_id, hai) do
-    if hai in get_in(hands, [player_id, :tehai]) || hai == tsumohai do
-      hands = update_hands(hands, player_id, hai, tsumohai)
-      game = %__MODULE__{game | tsumohai: nil, hands: hands}
+  def dahai(%__MODULE__{tsumoban: tsumoban}, player_id, _hai) when tsumoban != player_id do
+    {:error, :not_your_turn}
+  end
+
+  def dahai(game = %__MODULE__{tehai: tehai, sutehai: sutehai, tsumohai: dahai}, player_id, dahai) do
+    sutehai = Map.update!(sutehai, player_id, fn tiles -> [%{hai: dahai, tsumogiri: true} | tiles] end)
+    game = %__MODULE__{game | tsumohai: nil, sutehai: sutehai}
+
+    {:ok, game}
+  end
+
+  def dahai(game = %__MODULE__{tehai: tehai, sutehai: sutehai, tsumohai: tsumohai}, player_id, dahai) do
+    if dahai in Map.get(tehai, player_id) do
+      sutehai = Map.update!(sutehai, player_id, fn tiles -> [%{hai: dahai, tsumogiri: false} | tiles] end)
+      tehai = Map.update!(tehai, player_id, fn tiles -> [tsumohai | Enum.reject(tiles, &(&1 == dahai))] end)
+      game = %__MODULE__{game | tsumohai: nil, tehai: tehai, sutehai: sutehai}
 
       {:ok, game}
     else
       {:error, :not_in_your_hand}
     end
-  end
-
-  def dahai(%__MODULE__{tsumoban: tsumoban}, player_id, _hai) when tsumoban != player_id do
-    {:error, :not_your_turn}
-  end
-
-  defp update_hands(hands, player_id, dahai, tsumohai) do
-    Map.update!(hands, player_id, fn hand = %{tehai: tehai, sutehai: sutehai} ->
-      hand
-      |> Map.put(:sutehai, [%{hai: dahai, tsumogiri: dahai == tsumohai} | sutehai])
-      |> Map.put(:tehai, Enum.reject([tsumohai | tehai], &(&1 == dahai)))
-    end)
   end
 end

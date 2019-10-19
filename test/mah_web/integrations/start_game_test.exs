@@ -36,9 +36,9 @@ defmodule MahWeb.StartGameTest do
       assertions =
         Enum.map(game_events(), fn
           %{event: "game:start", payload: payload} ->
-            assert length(payload.hand.tehai) == 13
-            assert payload.hand.sutehai == []
-            assert payload.hand.furo == []
+            assert length(payload.tehai) == 13
+            assert payload.sutehai == []
+            assert payload.furo == []
             assert payload.players == players
 
           %{event: "game:tsumo", topic: topic} ->

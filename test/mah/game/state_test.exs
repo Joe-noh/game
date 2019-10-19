@@ -44,18 +44,16 @@ defmodule Mah.Game.StateTest do
       assert length(state.rinshanhai) == 4
       assert length(state.wanpai) == 10
 
-      Enum.each(state.hands, fn {_player, hand} ->
-        assert hand.sutehai == []
-        assert hand.furo == []
-        assert length(hand.tehai) == 13
-      end)
+      Enum.each(state.sutehai, fn {_player, sutehai} -> assert sutehai == [] end)
+      Enum.each(state.furo, fn {_player, furo} -> assert furo == [] end)
+      Enum.each(state.tehai, fn {_player, tehai} -> assert length(tehai) == 13 end)
 
       all_tiles =
         List.flatten([
           state.yamahai,
           state.rinshanhai,
           state.wanpai,
-          Enum.map(state.hands, fn {_, %{tehai: tehai}} -> tehai end)
+          Enum.map(state.tehai, fn {_, tiles} -> tiles end)
         ])
 
       assert length(all_tiles) == 136
