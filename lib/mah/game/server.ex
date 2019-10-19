@@ -23,6 +23,10 @@ defmodule Mah.Game.Server do
     {:ok, State.hands(game)}
   end
 
+  def state(id) do
+    {:ok, GenStateMachine.call(via_tuple(id), :game_state)} # Bad practice!
+  end
+
   def alive?(id) do
     case Horde.Registry.lookup(via_tuple(id)) do
       [] -> false

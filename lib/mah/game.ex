@@ -19,4 +19,5 @@ defmodule Mah.Game do
   defdelegate startable_with?(game_id, player_ids), to: Mah.Game.Server
   defdelegate dahai(game_id, player_id, hai), to: Mah.Game.Server
   defdelegate next_tsumo(game_id), to: Mah.Game.Server
+  defdelegate state(game_id), to: Mah.Game.Server
 end
