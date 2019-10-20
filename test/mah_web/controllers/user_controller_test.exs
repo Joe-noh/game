@@ -4,7 +4,7 @@ defmodule MahWeb.UserControllerTest do
   describe "show user" do
     setup %{conn: conn} do
       {:ok, user} = Fixtures.create(:user, name: "john")
-      conn = TestHelpers.login(conn, user)
+      conn = TestHelpers.Session.login(conn, user)
 
       %{conn: conn, user: user}
     end

@@ -4,7 +4,7 @@ defmodule MahWeb.ParticipationControllerTest do
   describe "declare participation" do
     setup %{conn: conn} do
       {:ok, user} = Fixtures.create(:user)
-      conn = TestHelpers.login(conn, user)
+      conn = TestHelpers.Session.login(conn, user)
 
       %{conn: conn, user: user}
     end
@@ -34,7 +34,7 @@ defmodule MahWeb.ParticipationControllerTest do
 
     test "requires login", %{conn: conn} do
       conn
-      |> TestHelpers.logout()
+      |> TestHelpers.Session.logout()
       |> post(Routes.participation_path(conn, :create))
       |> json_response(401)
     end
