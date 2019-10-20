@@ -17,6 +17,7 @@ defmodule MahWeb.GameChannel.GameStateViewTest do
         players: game.players,
         honba: 0,
         round: 1,
+        points: players |> Enum.map(&{&1, 25000}) |> Enum.into(%{}),
         tehai: game.tehai |> Map.get(player),
         sutehai: players |> Enum.map(&{&1, []}) |> Enum.into(%{}),
         tsumoban: List.first(game.players),

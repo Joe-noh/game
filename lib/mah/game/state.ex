@@ -11,6 +11,7 @@ defmodule Mah.Game.State do
     round: pos_integer(),
     tsumoban: player() | nil,
     tsumohai: tile() | nil,
+    points: %{required(player()) => list(integer())},
     tehai: %{required(player()) => list(tile())},
     furo: %{required(player()) => list(tile())},
     sutehai: %{required(player()) => list(%{hai: tile(), tsumogiri: bool()})},
@@ -26,6 +27,7 @@ defmodule Mah.Game.State do
             round: 1,
             tsumoban: nil,
             tsumohai: nil,
+            points: %{},
             tehai: %{},
             furo: %{},
             sutehai: %{},
@@ -51,11 +53,11 @@ defmodule Mah.Game.State do
 
   def add_player(game = %__MODULE__{players: players}, player_id) do
     cond do
-      length(players) == 4 ->
-        {:error, :full}
-
       player_id in players ->
         {:error, :already_joined}
+
+      length(players) == 4 ->
+        {:error, :full}
 
       true ->
         {:ok, %__MODULE__{game | players: [player_id | players]}}
@@ -94,9 +96,10 @@ defmodule Mah.Game.State do
     players = [tsumoban | _] = Enum.shuffle(players)
 
     tehai = players |> Enum.zip(Enum.chunk_every(tiles, 13)) |> Enum.into(%{})
-    empties = players |> Enum.reduce(%{}, &Map.put(&2, &1, []))
+    furo = sutehai = players |> Enum.reduce(%{}, &Map.put(&2, &1, []))
+    points = players |> Enum.reduce(%{}, &Map.put(&2, &1, 25000))
 
-    %__MODULE__{game | players: players, tsumoban: tsumoban, tehai: tehai, furo: empties, sutehai: empties, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai}
+    %__MODULE__{game | players: players, tsumoban: tsumoban, points: points, tehai: tehai, furo: furo, sutehai: sutehai, yamahai: yamahai, rinshanhai: rinshanhai, wanpai: wanpai}
   end
 
   def proceed_tsumoban(game = %__MODULE__{players: players, tsumoban: tsumoban}) do
@@ -117,7 +120,7 @@ defmodule Mah.Game.State do
     {:error, :not_your_turn}
   end
 
-  def dahai(game = %__MODULE__{tehai: tehai, sutehai: sutehai, tsumohai: dahai}, player_id, dahai) do
+  def dahai(game = %__MODULE__{sutehai: sutehai, tsumohai: dahai}, player_id, dahai) do
     sutehai = Map.update!(sutehai, player_id, fn tiles -> [%{hai: dahai, tsumogiri: true} | tiles] end)
     game = %__MODULE__{game | tsumohai: nil, sutehai: sutehai}
 

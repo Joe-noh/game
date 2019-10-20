@@ -7,6 +7,7 @@ defmodule MahWeb.GameChannel.GameStateSerializer do
       round: game.round,
       tsumoban: game.tsumoban,
       tsumohai: tsumohai(player, game),
+      points: game.points,
       tehai: Map.get(game.tehai, player),
       sutehai: game.sutehai
     }
