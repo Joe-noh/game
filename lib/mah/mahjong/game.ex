@@ -34,7 +34,7 @@ defmodule Mah.Mahjong.Game do
   def add_player(game = %__MODULE__{rule: rule, players: players}, player_id) do
     cond do
       player_id in Map.keys(players) ->
-        {:error, :already_joined}
+        {:ok, game}
 
       map_size(players) == rule.num_players ->
         {:error, :full}

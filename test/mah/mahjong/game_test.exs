@@ -15,9 +15,9 @@ defmodule Mah.Mahjong.GameTest do
       assert {:ok, _} = Game.add_player(game, "p4")
     end
 
-    test "return error on duplicate join", %{game: game} do
+    test "does not return error on duplicate join", %{game: game} do
       assert {:ok, game} = Game.add_player(game, "p1")
-      assert {:error, :already_joined} == Game.add_player(game, "p1")
+      assert {:ok, game} == Game.add_player(game, "p1")
     end
 
     test "return error if full member", %{game: game} do
