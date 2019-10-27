@@ -11,10 +11,10 @@ defmodule Mah.Application do
       MahWeb.Endpoint,
       MahWeb.Presence,
       Mah.Matching.Server,
-      {Horde.Supervisor, name: Mah.GameSupervisor, strategy: :one_for_one},
-      {Horde.Registry, name: Mah.GameRegistry, keys: :unique},
+      {Horde.Supervisor, name: Mah.GameStoreSupervisor, strategy: :one_for_one},
+      {Horde.Registry, name: Mah.GameStoreRegistry, keys: :unique},
       {Cluster.Supervisor, [topologies, [name: Mah.ClusterSupervisor]]},
-      {Mah.Cluster.Connector, [[Mah.GameSupervisor, Mah.GameRegistry], [name: Mah.Cluster.Connector]]}
+      {Mah.Cluster.Connector, [[Mah.GameStoreSupervisor, Mah.GameStoreRegistry], [name: Mah.Cluster.Connector]]}
     ]
 
     Supervisor.start_link(children, strategy: :one_for_one, name: Mah.Supervisor)
