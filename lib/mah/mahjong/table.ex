@@ -12,6 +12,7 @@ defmodule Mah.Mahjong.Table do
   @foreign_key_type :binary_id
   schema "tables" do
     field :status, :integer, default: Map.get(@status_enum, :created)
+    field :public, :boolean, default: true
 
     timestamps()
   end
@@ -19,8 +20,8 @@ defmodule Mah.Mahjong.Table do
   @doc false
   def changeset(table, attrs \\ %{}) do
     table
-    |> cast(attrs, [:status])
-    |> validate_required([:status])
+    |> cast(attrs, [:status, :public])
+    |> validate_required([:status, :public])
     |> validate_inclusion(:status, Map.values(@status_enum))
   end
 
