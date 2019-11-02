@@ -6,15 +6,21 @@ defmodule Mah.Matching do
   import Ecto.Query
 
   alias Mah.Repo
-  alias Mah.Matching.Table
+  alias Mah.Matching.{ParticipationTable, Table}
 
-  def find_table(_condition \\ %{}) do
-    created = Table.status(:created)
+  def find_table(player_id, _condition \\ %{}) do
+    case ParticipationTable.get(player_id) do
+      nil ->
+        created = Table.status(:created)
 
-    Table
-    |> where(public: true, status: ^created)
-    |> order_by(asc: :inserted_at)
-    |> Repo.one()
+        Table
+        |> where(public: true, status: ^created)
+        |> order_by(asc: :inserted_at)
+        |> Repo.one()
+
+      game_id ->
+        Repo.get(Table, game_id)
+    end
   end
 
   def create_table(attrs) do
