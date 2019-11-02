@@ -8,7 +8,7 @@ defmodule Mah.Matching do
   alias Mah.Repo
   alias Mah.Matching.Table
 
-  def find_table do
+  def find_table(_condition \\ %{}) do
     created = Table.status(:created)
 
     Table
@@ -17,9 +17,17 @@ defmodule Mah.Matching do
     |> Repo.one()
   end
 
-  def create_table do
+  def create_table(attrs) do
+    attrs = Enum.into(attrs, %{})
+
     %Table{}
-    |> Table.changeset()
+    |> Table.changeset(attrs)
     |> Repo.insert()
+  end
+
+  def change_table_status(table, status) do
+    table
+    |> Table.changeset(%{status: Table.status(status)})
+    |> Repo.update()
   end
 end
