@@ -10,27 +10,19 @@ defmodule Mah.GameStore do
   end
 
   def get(game_id) do
-    if_alive(game_id, fn _pid ->
-      Agent.get(via_tuple(game_id), fn game -> game end)
-    end)
+    if_alive(game_id, &Agent.get(&1, fn game -> game end))
   end
 
   def put(game_id, game) do
-    if_alive(game_id, fn _pid ->
-      Agent.update(via_tuple(game_id), fn _ -> game end)
-    end)
+    if_alive(game_id, &Agent.update(&1, fn _ -> game end))
   end
 
   def update(game_id, fun) do
-    if_alive(game_id, fn _pid ->
-      Agent.update(via_tuple(game_id), fun)
-    end)
+    if_alive(game_id, &Agent.update(&1, fun))
   end
 
   def stop(game_id) do
-    if_alive(game_id, fn pid ->
-      Horde.Supervisor.terminate_child(Mah.GameStoreSupervisor, pid)
-    end)
+    if_alive(game_id, &Horde.Supervisor.terminate_child(Mah.GameStoreSupervisor, &1))
   end
 
   def pid(game_id) do
@@ -38,6 +30,10 @@ defmodule Mah.GameStore do
       [{pid, _}] -> pid
       _else -> nil
     end
+  end
+
+  def alive?(game_id) do
+    pid(game_id) |> is_pid()
   end
 
   defp if_alive(game_id, fun) do

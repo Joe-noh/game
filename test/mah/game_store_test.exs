@@ -66,4 +66,16 @@ defmodule Mah.GameStoreTest do
       assert {:error, :not_found} == GameStore.stop("unstarted")
     end
   end
+
+  describe "alive?/1" do
+    test "returns true if process is alive", %{uuid: uuid} do
+      {:ok, _pid} = GameStore.start(uuid, :state)
+
+      assert true == GameStore.alive?(uuid)
+    end
+
+    test "returns false if process does not exist", %{uuid: uuid} do
+      assert false == GameStore.alive?(uuid)
+    end
+  end
 end
