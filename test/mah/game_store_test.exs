@@ -33,7 +33,7 @@ defmodule Mah.GameStoreTest do
   end
 
   describe "put/2" do
-    test "updates state", %{uuid: uuid} do
+    test "replace state", %{uuid: uuid} do
       {:ok, _pid} = GameStore.start(uuid, :a)
 
       assert :ok = GameStore.put(uuid, :b)
@@ -42,6 +42,15 @@ defmodule Mah.GameStoreTest do
 
     test "returns error on not found" do
       assert {:error, :not_found} == GameStore.put("unstarted", :hey)
+    end
+  end
+
+  describe "update/2" do
+    test "updates state", %{uuid: uuid} do
+      {:ok, _pid} = GameStore.start(uuid, 1)
+
+      assert :ok = GameStore.update(uuid, &(&1 + 1))
+      assert 2 == GameStore.get(uuid)
     end
   end
 

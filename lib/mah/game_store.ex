@@ -21,6 +21,12 @@ defmodule Mah.GameStore do
     end)
   end
 
+  def update(game_id, fun) do
+    if_alive(game_id, fn _pid ->
+      Agent.update(via_tuple(game_id), fun)
+    end)
+  end
+
   def stop(game_id) do
     if_alive(game_id, fn pid ->
       Horde.Supervisor.terminate_child(Mah.GameStoreSupervisor, pid)
