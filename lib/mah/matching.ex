@@ -36,4 +36,32 @@ defmodule Mah.Matching do
     |> Table.changeset(%{status: Table.status(status)})
     |> Repo.update()
   end
+
+  def spawn_or_join(player_id) do
+    case find_table(player_id) do
+      nil -> spawn_game(player_id)
+      table -> join_game(table, player_id)
+    end
+  end
+
+  defp spawn_game(first_player_id) do
+    with {:ok, %{id: game_id}} <- create_table(public: true),
+         {:ok, game} <- %Mah.Mahjong.Game{} |> Mah.Mahjong.Game.add_player(first_player_id),
+         {:ok, _pid} <- Mah.GameStore.start(game_id, game),
+         :ok <- ParticipationTable.add(first_player_id, game_id) do
+      {:ok, game_id}
+    end
+  end
+
+  defp join_game(_table = %{id: game_id}, player_id) do
+    fun = fn game ->
+      {:ok, game} = Mah.Mahjong.Game.add_player(game, player_id)
+      game
+    end
+
+    with :ok <- Mah.GameStore.update(game_id, fun),
+         :ok <- ParticipationTable.add(player_id, game_id) do
+      {:ok, game_id}
+    end
+  end
 end
