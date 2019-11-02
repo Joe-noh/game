@@ -1,4 +1,4 @@
-defmodule Mah.Mahjong.Table do
+defmodule Mah.Matching.Table do
   use Ecto.Schema
   import Ecto.Changeset
 

@@ -1,4 +1,4 @@
-defmodule Mah.Mahjong.Matching do
+defmodule Mah.Matching do
   @moduledoc """
   Provides game matching functionalities.
   """
@@ -6,7 +6,7 @@ defmodule Mah.Mahjong.Matching do
   import Ecto.Query
 
   alias Mah.Repo
-  alias Mah.Mahjong.Table
+  alias Mah.Matching.Table
 
   def find_table do
     created = Table.status(:created)

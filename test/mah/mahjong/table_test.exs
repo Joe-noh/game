@@ -1,8 +1,8 @@
-defmodule Mah.Mahjong.TableTest do
+defmodule Mah.Matching.TableTest do
   use Mah.DataCase, async: true
 
   alias Mah.Repo
-  alias Mah.Mahjong.Table
+  alias Mah.Matching.Table
 
   describe "status" do
     setup do
