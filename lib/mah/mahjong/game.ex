@@ -31,6 +31,34 @@ defmodule Mah.Mahjong.Game do
     %__MODULE__{rule: rule}
   end
 
+  def startable?(%__MODULE__{players: players, rule: rule}) do
+    map_size(players) == rule.num_players
+  end
+
+  def participated?(game = %__MODULE__{}, player_id) do
+    player_id in players(game)
+  end
+
+  def players(%__MODULE__{players: players}) do
+    Map.keys(players)
+  end
+
+  def tsumoban(%__MODULE__{tsumoban: tsumoban}), do: tsumoban
+
+  def tsumohai(%__MODULE__{tsumohai: tsumohai}), do: tsumohai
+
+  def masked_for(game = %__MODULE__{players: players}, player_id) do
+    players =
+      players
+      |> Enum.map(fn
+        {^player_id, player} -> {player_id, player}
+        {other_id, player} -> {other_id, Game.Player.mask_hands(player)}
+      end)
+      |> Enum.into(%{})
+
+    %__MODULE__{game | players: players, yamahai: [], rinshanhai: [], wanpai: []}
+  end
+
   def add_player(game = %__MODULE__{rule: rule, players: players}, player_id) do
     cond do
       player_id in Map.keys(players) ->
@@ -43,14 +71,6 @@ defmodule Mah.Mahjong.Game do
         players = Map.put(players, player_id, %Game.Player{})
         {:ok, %__MODULE__{game | players: players}}
     end
-  end
-
-  def startable?(%__MODULE__{players: players, rule: rule}) do
-    map_size(players) == rule.num_players
-  end
-
-  def participated?(%__MODULE__{players: players}, player_id) do
-    player_id in Map.keys(players)
   end
 
   def haipai(game) do
@@ -94,7 +114,7 @@ defmodule Mah.Mahjong.Game do
     player = Map.get(players, tsumoban)
 
     with {:ok, player} <- Game.Player.tsumo(player, tsumohai) do
-      players = Map.update!(players, tsumoban, player)
+      players = Map.put(players, tsumoban, player)
       %__MODULE__{game | yamahai: yamahai, players: players}
     end
   end

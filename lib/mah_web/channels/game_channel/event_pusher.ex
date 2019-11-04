@@ -4,26 +4,19 @@ defmodule MahWeb.GameChannel.EventPusher do
   """
 
   @spec game_start(payload :: map()) :: :ok | no_return()
-  def game_start(game = %{players: players}) do
-    players
-    |> Map.keys()
+  def game_start(game_id) do
+    Mah.Game.players(game_id)
     |> Enum.each(fn player_id ->
-      masked_players =
-        players
-        |> Enum.map(fn
-          {^player_id, player} -> {player_id, player}
-          {other_id, player} -> {other_id, Map.put(player, :tehai, [])}
-        end)
-        |> Enum.into(%{})
-
-      push(player_id, "game:start", masked_players)
+      push(player_id, "game:start", Mah.Game.masked_for(game_id, player_id))
     end)
   end
 
   @spec tsumo(payload :: map()) :: :ok | no_return()
-  def tsumo(%{tsumoban: tsumoban, players: players, tsumohai: tsumohai}) do
-    players
-    |> Map.keys()
+  def tsumo(game_id) do
+    tsumoban = Mah.Game.tsumoban(game_id)
+    tsumohai = Mah.Game.tsumohai(game_id)
+
+    Mah.Game.players(game_id)
     |> Enum.each(fn
       ^tsumoban -> push(tsumoban, "game:tsumo", %{tsumohai: tsumohai})
       other -> push(other, "game:tacha_tsumo", %{player: tsumoban})

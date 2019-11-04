@@ -28,6 +28,11 @@ defmodule Mah.Mahjong.Game.Player do
     Enum.any?(sutehai, fn s -> Map.get(s, :reach) end)
   end
 
+  @spec mask_hands(player :: t()) :: t()
+  def mask_hands(player) do
+    %__MODULE__{player | tehai: [], tsumohai: nil}
+  end
+
   @spec chakuseki(player :: t(), seki :: seki(), point :: non_neg_integer()) :: {:ok, t()} | {:error, atom()}
   def chakuseki(player, seki, point) when seki in 0..3 do
     {:ok, %__MODULE__{player | point: point, seki: seki}}

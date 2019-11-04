@@ -17,14 +17,33 @@ defmodule Mah.Game do
   end
 
   def game(game_id) do
-    GameStore.get(game_id) |> Map.from_struct()
+    GameStore.get(game_id)
+  end
+
+  def players(game_id) do
+    GameStore.get(game_id) |> Game.players()
+  end
+
+  def tsumoban(game_id) do
+    GameStore.get(game_id) |> Game.tsumoban()
+  end
+
+  def tsumohai(game_id) do
+    GameStore.get(game_id) |> Game.tsumohai()
+  end
+
+  def masked_for(game_id, player_id) do
+    GameStore.get(game_id) |> Game.masked_for(player_id)
   end
 
   def start(game_id) do
     GameStore.update(game_id, &Game.haipai(&1))
   end
 
-  defdelegate players(game_id), to: Mah.Game.Server
+  def tsumo(game_id) do
+    GameStore.update(game_id, &Game.tsumo(&1))
+  end
+
   defdelegate hands(game_id), to: Mah.Game.Server
   defdelegate add_player(game_id, player_id), to: Mah.Game.Server
   defdelegate player_ready(game_id, player_id), to: Mah.Game.Server

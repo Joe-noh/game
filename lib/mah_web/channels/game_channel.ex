@@ -13,14 +13,13 @@ defmodule MahWeb.GameChannel do
     end
   end
 
-  def handle_in("ready", _, socket = %{assigns: %{user_id: user_id, game_id: game_id}}) do
+  def handle_in("ready", _, socket = %{assigns: %{game_id: game_id}}) do
     if Mah.Game.startable?(game_id) do
       :ok = Mah.Game.start(game_id)
+      EventPusher.game_start(game_id)
 
-      game = Mah.Game.game(game_id)
-
-      EventPusher.game_start(game)
-      EventPusher.tsumo(game)
+      # :ok = Mah.Game.tsumo(game_id)
+      EventPusher.tsumo(game_id)
     end
 
     {:noreply, socket}
