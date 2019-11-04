@@ -3,6 +3,30 @@ defmodule Mah.Mahjong.GameTest do
 
   alias Mah.Mahjong.Game
 
+  describe "startable?" do
+    setup [:one_more_player]
+
+    test "returns true if all players got together", %{game: game} do
+      assert false == Game.startable?(game)
+
+      {:ok, game} = Game.add_player(game, "p4")
+
+      assert true == Game.startable?(game)
+    end
+  end
+
+  describe "participated?" do
+    setup [:one_more_player]
+
+    test "returns true when already in players", %{game: game} do
+      assert true == Game.participated?(game, "p1")
+    end
+
+    test "returns false when not in players", %{game: game} do
+      assert false == Game.participated?(game, "p4")
+    end
+  end
+
   describe "add_player/2" do
     setup do
       %{game: Game.new(%Game.Rule{})}
@@ -75,8 +99,15 @@ defmodule Mah.Mahjong.GameTest do
     end
   end
 
+  defp one_more_player(_) do
+    game = Game.new(%Game.Rule{num_players: 4})
+    game = Enum.reduce(~w[p1 p2 p3], game, fn id, acc -> Game.add_player(acc, id) |> elem(1) end)
+
+    %{game: game}
+  end
+
   defp startable_game(_) do
-    game = Game.new(%Game.Rule{})
+    game = Game.new(%Game.Rule{num_players: 4})
     game = Enum.reduce(~w[p1 p2 p3 p4], game, fn id, acc -> Game.add_player(acc, id) |> elem(1) end)
 
     %{game: game}

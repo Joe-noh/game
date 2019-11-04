@@ -49,6 +49,10 @@ defmodule Mah.Mahjong.Game do
     map_size(players) == rule.num_players
   end
 
+  def participated?(%__MODULE__{players: players}, player_id) do
+    player_id in Map.keys(players)
+  end
+
   def haipai(game) do
     if startable?(game) do
       {:ok, do_haipai(game)}

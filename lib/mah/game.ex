@@ -12,6 +12,10 @@ defmodule Mah.Game do
     GameStore.get(game_id) |> Game.startable?()
   end
 
+  def participated?(game_id, player_id) do
+    GameStore.get(game_id) |> Game.participated?(player_id)
+  end
+
   def game(game_id) do
     GameStore.get(game_id) |> Map.from_struct()
   end
