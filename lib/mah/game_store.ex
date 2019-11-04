@@ -18,8 +18,11 @@ defmodule Mah.GameStore do
   end
 
   def update(game_id, fun) do
-    if_alive(game_id, &Agent.update(&1, fun))
+    if_alive(game_id, &Agent.update(&1, fn game -> fun.(game) |> unwrap() end))
   end
+
+  defp unwrap({:ok, result}), do: result
+  defp unwrap(result), do: result
 
   def stop(game_id) do
     if_alive(game_id, &Horde.Supervisor.terminate_child(Mah.GameStoreSupervisor, &1))

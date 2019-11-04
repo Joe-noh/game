@@ -4,23 +4,29 @@ defmodule MahWeb.GameChannel.EventPusher do
   """
 
   @spec game_start(payload :: map()) :: :ok | no_return()
-  def game_start(%{players: players, hands: %{tehai: tehai, furo: furo, sutehai: sutehai}}) do
-    Enum.each(players, fn player ->
-      payload = %{
-        players: players,
-        tehai: Map.get(tehai, player),
-        furo: Map.get(furo, player),
-        sutehai: Map.get(sutehai, player)
-      }
-      push(player, "game:start", payload)
+  def game_start(game = %{players: players}) do
+    players
+    |> Map.keys()
+    |> Enum.each(fn player_id ->
+      masked_players =
+        players
+        |> Enum.map(fn
+          {^player_id, player} -> {player_id, player}
+          {other_id, player} -> {other_id, Map.put(player, :tehai, [])}
+        end)
+        |> Enum.into(%{})
+
+      push(player_id, "game:start", masked_players)
     end)
   end
 
   @spec tsumo(payload :: map()) :: :ok | no_return()
-  def tsumo(%{player: player, players: players, tsumohai: tsumohai}) do
-    Enum.each(players, fn
-      ^player -> push(player, "game:tsumo", %{tsumohai: tsumohai})
-      other -> push(other, "game:tacha_tsumo", %{player: player})
+  def tsumo(%{tsumoban: tsumoban, players: players, tsumohai: tsumohai}) do
+    players
+    |> Map.keys()
+    |> Enum.each(fn
+      ^tsumoban -> push(tsumoban, "game:tsumo", %{tsumohai: tsumohai})
+      other -> push(other, "game:tacha_tsumo", %{player: tsumoban})
     end)
   end
 
@@ -32,6 +38,6 @@ defmodule MahWeb.GameChannel.EventPusher do
 
   @spec push(player_id :: String.t(), event :: String.t(), payload :: map()) :: :ok | no_return()
   defp push(player_id, event, payload) do
-    MahWeb.Endpoint.broadcast!("user:#{player_id}", event, payload)
+    MahWeb.UserSocket.id(player_id) |> MahWeb.Endpoint.broadcast!(event, payload)
   end
 end

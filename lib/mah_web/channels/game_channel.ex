@@ -14,17 +14,13 @@ defmodule MahWeb.GameChannel do
   end
 
   def handle_in("ready", _, socket = %{assigns: %{user_id: user_id, game_id: game_id}}) do
-    if {:ok, :startable} == Mah.Game.player_ready(game_id, user_id) do
-      players = MahWeb.Presence.list(socket) |> Map.keys()
+    if Mah.Game.startable?(game_id) do
+      :ok = Mah.Game.start(game_id)
 
-      if Mah.Game.startable_with?(game_id, players) do
-        {:ok, %{player: player, tsumohai: tsumohai}} = Mah.Game.start_game(game_id)
-        {:ok, players} = Mah.Game.players(game_id)
-        {:ok, hands} = Mah.Game.hands(game_id)
+      game = Mah.Game.game(game_id)
 
-        EventPusher.game_start(%{players: players, hands: hands})
-        EventPusher.tsumo(%{player: player, players: players, tsumohai: tsumohai})
-      end
+      EventPusher.game_start(game)
+      EventPusher.tsumo(game)
     end
 
     {:noreply, socket}
