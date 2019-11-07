@@ -6,12 +6,20 @@ defmodule Mah.Mahjong.GameTest do
   describe "startable?" do
     setup [:one_more_player]
 
-    test "returns true if all players got together", %{game: game} do
-      assert false == Game.startable?(game)
+    test "returns true if all players got together", context do
+      %{game: game} = one_more_player(context)
 
+      assert false == Game.startable?(game)
       {:ok, game} = Game.add_player(game, "p4")
+      assert true == Game.startable?(game)
+    end
+
+    test "returns false if it already started", context do
+      %{game: game} = startable_game(context)
 
       assert true == Game.startable?(game)
+      game = %Game{game | started: true}
+      assert false == Game.startable?(game)
     end
   end
 

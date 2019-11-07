@@ -8,6 +8,7 @@ defmodule Mah.Mahjong.Game do
   @type tiles :: list(tile())
   @type t :: %{
           rule: Game.Rule.t(),
+          started: boolean(),
           honba: non_neg_integer(),
           round: pos_integer(),
           tsumoban: player_id() | nil,
@@ -18,6 +19,7 @@ defmodule Mah.Mahjong.Game do
         }
 
   defstruct rule: %Game.Rule{},
+            started: false,
             honba: 0,
             round: 1,
             tsumoban: nil,
@@ -31,7 +33,10 @@ defmodule Mah.Mahjong.Game do
     %__MODULE__{rule: rule}
   end
 
-  def startable?(%__MODULE__{players: players, rule: rule}) do
+  @spec startable?(t()) :: boolean()
+  def startable?(%__MODULE__{started: true}), do: false
+
+  def startable?(%__MODULE__{started: false, players: players, rule: rule}) do
     map_size(players) == rule.num_players
   end
 
@@ -74,11 +79,7 @@ defmodule Mah.Mahjong.Game do
   end
 
   def haipai(game) do
-    if startable?(game) do
-      {:ok, do_haipai(game)}
-    else
-      {:error, :not_enough_players}
-    end
+    {:ok, do_haipai(%__MODULE__{game | started: true})}
   end
 
   defp do_haipai(game = %__MODULE__{rule: rule, players: players}) do
