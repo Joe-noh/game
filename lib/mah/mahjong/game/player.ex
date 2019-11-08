@@ -70,7 +70,7 @@ defmodule Mah.Mahjong.Game.Player do
   defp do_dahai(player = %__MODULE__{tsumohai: hai, sutehai: sutehai}, hai, opts) do
     reach = Keyword.get(opts, :reach, false)
     sutehai = [%{hai: hai, tsumogiri: true, reach: reach} | sutehai]
-    player = %__MODULE__{player | sutehai: sutehai}
+    player = %__MODULE__{player | tsumohai: nil, sutehai: sutehai}
 
     {:ok, player}
   end
