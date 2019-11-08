@@ -9,31 +9,31 @@ defmodule Mah.Game do
   defdelegate alive?(game_id), to: Mah.GameStore
 
   def startable?(game_id) do
-    GameStore.get(game_id) |> Game.startable?()
+    with {:ok, game} <- GameStore.get(game_id), do: Game.startable?(game)
   end
 
   def participated?(game_id, player_id) do
-    GameStore.get(game_id) |> Game.participated?(player_id)
+    with {:ok, game} <- GameStore.get(game_id), do: Game.participated?(game, player_id)
   end
 
   def game(game_id) do
-    GameStore.get(game_id)
+    with {:ok, game} <- GameStore.get(game_id), do: game
   end
 
   def players(game_id) do
-    GameStore.get(game_id) |> Game.players()
+    with {:ok, game} <- GameStore.get(game_id), do: Game.players(game)
   end
 
   def tsumoban(game_id) do
-    GameStore.get(game_id) |> Game.tsumoban()
+    with {:ok, game} <- GameStore.get(game_id), do: Game.tsumoban(game)
   end
 
   def tsumohai(game_id) do
-    GameStore.get(game_id) |> Game.tsumohai()
+    with {:ok, game} <- GameStore.get(game_id), do: Game.tsumohai(game)
   end
 
   def masked_for(game_id, player_id) do
-    GameStore.get(game_id) |> Game.masked_for(player_id)
+    with {:ok, game} <- GameStore.get(game_id), do: Game.masked_for(game, player_id)
   end
 
   def start(game_id) do

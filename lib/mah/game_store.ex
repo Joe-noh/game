@@ -10,7 +10,7 @@ defmodule Mah.GameStore do
   end
 
   def get(game_id) do
-    if_alive(game_id, &Agent.get(&1, fn game -> game end))
+    if_alive(game_id, &Agent.get(&1, fn game -> {:ok, game} end))
   end
 
   def put(game_id, game) do
