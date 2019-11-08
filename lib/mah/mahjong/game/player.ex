@@ -39,7 +39,7 @@ defmodule Mah.Mahjong.Game.Player do
   end
 
   def chakuseki(_player, _seki) do
-    {:error, :invalid}
+    {:error, :invalid_chair_number}
   end
 
   @spec haipai(player :: t(), tiles :: Game.tiles()) :: {:ok, t()}
@@ -53,7 +53,7 @@ defmodule Mah.Mahjong.Game.Player do
   end
 
   def tsumo(_player, _tile) do
-    {:error, :invalid}
+    {:error, :already_have_tile}
   end
 
   @spec dahai(player :: t(), hai :: Game.tile(), opts :: [reach: bool()]) :: {:ok, t()} | {:error, atom()}

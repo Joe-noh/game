@@ -46,7 +46,7 @@ defmodule Mah.Mahjong.Game.CallTest do
     test "cannot kakan with incorrect tile" do
       {:ok, pon} = Call.new(:pon, :toimen, [0, 1, 2])
 
-      assert {:error, :invalid} = Call.kakan(pon, 4)
+      assert {:error, :not_kantsu} = Call.kakan(pon, 4)
     end
   end
 end

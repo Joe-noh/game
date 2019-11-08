@@ -20,7 +20,7 @@ defmodule Mah.Mahjong.Game.Call do
     if kotsu?(tiles) do
       {:ok, %__MODULE__{type: :pon, from: from, tiles: tiles}}
     else
-      {:error, :invalid}
+      {:error, :not_kotsu}
     end
   end
 
@@ -28,19 +28,19 @@ defmodule Mah.Mahjong.Game.Call do
     if shuntsu?(tiles) do
       {:ok, %__MODULE__{type: :chi, from: :kamicha, tiles: tiles}}
     else
-      {:error, :invalid}
+      {:error, :not_shuntu}
     end
   end
 
   def new(:chi, _not_kamicha, _tiles) do
-    {:error, :invalid}
+    {:error, :not_from_kamicha}
   end
 
   def new(:ankan, nil, tiles) when length(tiles) == 4 do
     if kantsu?(tiles) do
       {:ok, %__MODULE__{type: :ankan, from: nil, tiles: tiles}}
     else
-      {:error, :invalid}
+      {:error, :not_kantsu}
     end
   end
 
@@ -52,7 +52,7 @@ defmodule Mah.Mahjong.Game.Call do
     if kantsu?(tiles) do
       {:ok, %__MODULE__{type: :minkan, from: from, tiles: tiles}}
     else
-      {:error, :invalid}
+      {:error, :not_kantsu}
     end
   end
 
@@ -71,7 +71,7 @@ defmodule Mah.Mahjong.Game.Call do
     if kantsu?([tile | tiles]) do
       {:ok, %__MODULE__{call | type: :kakan, tiles: [tile | tiles]}}
     else
-      {:error, :invalid}
+      {:error, :not_kantsu}
     end
   end
 
