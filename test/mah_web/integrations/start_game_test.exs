@@ -18,8 +18,10 @@ defmodule MahWeb.StartGameTest do
       end)
 
       Enum.each(sockets, &@endpoint.subscribe(&1.id))
-      Enum.each(sockets, &Phoenix.ChannelTest.push(&1, "ready", %{}))
-      :timer.sleep(100)
+      Enum.each(sockets, fn socket ->
+        Phoenix.ChannelTest.push(socket, "ready", %{})
+        :timer.sleep(50)
+      end)
 
       [%{payload: %{players: players = [chicha | except_chicha]}} | _] = TestHelpers.Game.events(self(), "game:start")
 

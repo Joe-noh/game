@@ -13,14 +13,9 @@ defmodule MahWeb.GameChannel do
     end
   end
 
-  def handle_in("ready", _, socket = %{assigns: %{game_id: game_id}}) do
-    if Mah.Game.startable?(game_id) do
-      :ok = Mah.Game.start(game_id)
-      EventPusher.game_start(game_id)
-
-      # :ok = Mah.Game.tsumo(game_id)
-      EventPusher.tsumo(game_id)
-    end
+  def handle_in("ready", _, socket = %{assigns: %{user_id: user_id, game_id: game_id}}) do
+    Mah.Game.ready_player(game_id, user_id)
+    send(self(), {:start_game, game_id})
 
     {:noreply, socket}
   end
@@ -54,6 +49,18 @@ defmodule MahWeb.GameChannel do
   def handle_info(:track_presence, socket) do
     push(socket, "presence_state", MahWeb.Presence.list(socket))
     {:ok, _} = MahWeb.Presence.track(socket, socket.assigns.user_id, %{})
+
+    {:noreply, socket}
+  end
+
+  def handle_info({:start_game, game_id}, socket) do
+    if Mah.Game.startable?(game_id) do
+      :ok = Mah.Game.start(game_id)
+      EventPusher.game_start(game_id)
+
+      :ok = Mah.Game.tsumo(game_id)
+      EventPusher.tsumo(game_id)
+    end
 
     {:noreply, socket}
   end

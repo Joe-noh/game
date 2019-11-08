@@ -54,12 +54,7 @@ defmodule Mah.Matching do
   end
 
   defp join_game(_table = %{id: game_id}, player_id) do
-    fun = fn game ->
-      {:ok, game} = Mah.Mahjong.Game.add_player(game, player_id)
-      game
-    end
-
-    with :ok <- Mah.GameStore.update(game_id, fun),
+    with :ok <- Mah.Game.add_player(game_id, player_id),
          :ok <- ParticipationTable.add(player_id, game_id) do
       {:ok, game_id}
     end

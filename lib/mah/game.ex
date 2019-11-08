@@ -36,8 +36,16 @@ defmodule Mah.Game do
     with {:ok, game} <- GameStore.get(game_id), do: Game.masked_for(game, player_id)
   end
 
+  def add_player(game_id, player_id) do
+    GameStore.update(game_id, &Game.add_player(&1, player_id))
+  end
+
+  def ready_player(game_id, player_id) do
+    GameStore.update(game_id, &Game.ready_player(&1, player_id))
+  end
+
   def start(game_id) do
-    GameStore.update(game_id, &Game.haipai(&1))
+    GameStore.update(game_id, &Game.start(&1))
   end
 
   def tsumo(game_id) do
@@ -45,8 +53,6 @@ defmodule Mah.Game do
   end
 
   defdelegate hands(game_id), to: Mah.Game.Server
-  defdelegate add_player(game_id, player_id), to: Mah.Game.Server
-  defdelegate player_ready(game_id, player_id), to: Mah.Game.Server
   defdelegate start_game(game_id), to: Mah.Game.Server
   defdelegate dahai(game_id, player_id, hai), to: Mah.Game.Server
   defdelegate next_tsumo(game_id), to: Mah.Game.Server

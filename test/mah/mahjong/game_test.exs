@@ -6,11 +6,13 @@ defmodule Mah.Mahjong.GameTest do
   describe "startable?" do
     setup [:one_more_player]
 
-    test "returns true if all players got together", context do
+    test "returns true if all players ready", context do
       %{game: game} = one_more_player(context)
 
       assert false == Game.startable?(game)
       {:ok, game} = Game.add_player(game, "p4")
+      assert false == Game.startable?(game)
+      {:ok, game} = Game.ready_player(game, "p4")
       assert true == Game.startable?(game)
     end
 
@@ -109,15 +111,23 @@ defmodule Mah.Mahjong.GameTest do
 
   defp one_more_player(_) do
     game = Game.new(%Game.Rule{num_players: 4})
-    game = Enum.reduce(~w[p1 p2 p3], game, fn id, acc -> Game.add_player(acc, id) |> elem(1) end)
+    game = add_and_ready(game, ~w[p1 p2 p3])
 
     %{game: game}
   end
 
   defp startable_game(_) do
     game = Game.new(%Game.Rule{num_players: 4})
-    game = Enum.reduce(~w[p1 p2 p3 p4], game, fn id, acc -> Game.add_player(acc, id) |> elem(1) end)
+    game = add_and_ready(game, ~w[p1 p2 p3 p4])
 
     %{game: game}
+  end
+
+  defp add_and_ready(game, players) do
+    Enum.reduce(players, game, fn id, acc ->
+      {:ok, acc} = Game.add_player(acc, id)
+      {:ok, acc} = Game.ready_player(acc, id)
+      acc
+    end)
   end
 end

@@ -9,6 +9,7 @@ defmodule Mah.Mahjong.Game do
   @type t :: %{
           rule: Game.Rule.t(),
           started: boolean(),
+          ready_players: list(player_id()),
           honba: non_neg_integer(),
           round: pos_integer(),
           tsumoban: player_id() | nil,
@@ -20,6 +21,7 @@ defmodule Mah.Mahjong.Game do
 
   defstruct rule: %Game.Rule{},
             started: false,
+            ready_players: [],
             honba: 0,
             round: 1,
             tsumoban: nil,
@@ -36,8 +38,8 @@ defmodule Mah.Mahjong.Game do
   @spec startable?(t()) :: boolean()
   def startable?(%__MODULE__{started: true}), do: false
 
-  def startable?(%__MODULE__{started: false, players: players, rule: rule}) do
-    map_size(players) == rule.num_players
+  def startable?(%__MODULE__{started: false, ready_players: ready_players, rule: rule}) do
+    length(ready_players) == rule.num_players
   end
 
   def participated?(game = %__MODULE__{}, player_id) do
@@ -75,6 +77,23 @@ defmodule Mah.Mahjong.Game do
       true ->
         players = Map.put(players, player_id, %Game.Player{})
         {:ok, %__MODULE__{game | players: players}}
+    end
+  end
+
+  def ready_player(game = %__MODULE__{ready_players: ready_players, players: players}, player_id) do
+    if player_id in Map.keys(players) do
+      ready_players = Enum.uniq([player_id | ready_players])
+      {:ok, %__MODULE__{game | ready_players: ready_players}}
+    else
+      {:error, :not_joined}
+    end
+  end
+
+  def start(game) do
+    if startable?(game) do
+      {:ok, do_haipai(%__MODULE__{game | started: true})}
+    else
+      {:error, :not_startable}
     end
   end
 
@@ -116,7 +135,7 @@ defmodule Mah.Mahjong.Game do
 
     with {:ok, player} <- Game.Player.tsumo(player, tsumohai) do
       players = Map.put(players, tsumoban, player)
-      %__MODULE__{game | yamahai: yamahai, players: players}
+      {:ok, %__MODULE__{game | yamahai: yamahai, players: players}}
     end
   end
 
@@ -125,7 +144,7 @@ defmodule Mah.Mahjong.Game do
 
     with {:ok, player} <- Game.Player.dahai(player, hai, reach: reach),
          {:ok, game} <- proceed_tsumoban(game) do
-      %__MODULE__{game | players: Map.update!(players, player_id, player)}
+      {:ok, %__MODULE__{game | players: Map.update!(players, player_id, player)}}
     end
   end
 
