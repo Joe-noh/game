@@ -31,7 +31,7 @@ defmodule Mah.Mahjong.Game do
             rinshanhai: [],
             wanpai: []
 
-  def new(rule = %Game.Rule{}) do
+  def new(rule \\ %Game.Rule{}) do
     %__MODULE__{rule: rule}
   end
 

@@ -38,24 +38,24 @@ defmodule Mah.Matching do
   end
 
   def spawn_or_join(player_id) do
-    case find_table(player_id) do
-      nil -> spawn_game(player_id)
-      table -> join_game(table, player_id)
+    case ParticipationTable.join(player_id) do
+      {:newgame, game_id} ->
+        spawn_game(game_id, player_id)
+
+      {:joined, game_id} ->
+        join_game(game_id, player_id)
     end
   end
 
-  defp spawn_game(first_player_id) do
-    with {:ok, %{id: game_id}} <- create_table(public: true),
-         {:ok, game} <- %Mah.Mahjong.Game{} |> Mah.Mahjong.Game.add_player(first_player_id),
-         {:ok, _pid} <- Mah.GameStore.start(game_id, game),
-         :ok <- ParticipationTable.add(first_player_id, game_id) do
+  defp spawn_game(game_id, first_player_id) do
+    with {:ok, _pid} <- Mah.GameStore.start(game_id, Mah.Mahjong.Game.new()),
+         :ok <- Mah.Game.add_player(game_id, first_player_id) do
       {:ok, game_id}
     end
   end
 
-  defp join_game(_table = %{id: game_id}, player_id) do
-    with :ok <- Mah.Game.add_player(game_id, player_id),
-         :ok <- ParticipationTable.add(player_id, game_id) do
+  defp join_game(game_id, player_id) do
+    with :ok <- Mah.Game.add_player(game_id, player_id) do
       {:ok, game_id}
     end
   end
