@@ -14,6 +14,9 @@ defmodule Mah.Matching.Table do
     field :status, :integer, default: Map.get(@status_enum, :created)
     field :public, :boolean, default: true
 
+    has_many :participations, Mah.Matching.Participation
+    has_many :players, through: [:participations, :user]
+
     timestamps()
   end
 
