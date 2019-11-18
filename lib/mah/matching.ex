@@ -6,7 +6,7 @@ defmodule Mah.Matching do
   import Ecto.Query
 
   alias Mah.Repo
-  alias Mah.Matching.{ParticipationTable, Table}
+  alias Mah.Matching.{ParticipationTable, Participation, Table}
 
   def find_table(player_id, _condition \\ %{}) do
     case ParticipationTable.get(player_id) do
@@ -35,6 +35,12 @@ defmodule Mah.Matching do
     table
     |> Table.changeset(%{status: Table.status(status)})
     |> Repo.update()
+  end
+
+  def create_participation(table, user) do
+    %Participation{}
+    |> Participation.changeset(%{table_id: table.id, user_id: user.id})
+    |> Repo.insert()
   end
 
   def spawn_or_join(player_id) do
