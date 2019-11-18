@@ -6,22 +6,7 @@ defmodule Mah.Matching do
   import Ecto.Query
 
   alias Mah.Repo
-  alias Mah.Matching.{ParticipationTable, Participation, Table}
-
-  def find_table(player_id, _condition \\ %{}) do
-    case ParticipationTable.get(player_id) do
-      nil ->
-        created = Table.status(:created)
-
-        Table
-        |> where(public: true, status: ^created)
-        |> order_by(asc: :inserted_at)
-        |> Repo.one()
-
-      game_id ->
-        Repo.get(Table, game_id)
-    end
-  end
+  alias Mah.Matching.{Participation, Table}
 
   def find_participatable_table do
     finished = Table.status(:finished)
@@ -76,25 +61,13 @@ defmodule Mah.Matching do
     end
   end
 
-  def spawn_or_join(player_id) do
-    case ParticipationTable.join(player_id) do
-      {:newgame, game_id} ->
-        spawn_game(game_id, player_id)
+  def spawn_game(table = %Table{id: game_id}) do
+    game = Mah.Mahjong.Game.new()
+    players = Ecto.assoc(table, :players) |> Repo.all()
 
-      {:joined, game_id} ->
-        join_game(game_id, player_id)
-    end
-  end
+    with {:ok, _pid} <- Mah.GameStore.start(game_id, game) do
+      Enum.each(players, fn player -> :ok = Mah.Game.add_player(game_id, player.id) end)
 
-  defp spawn_game(game_id, first_player_id) do
-    with {:ok, _pid} <- Mah.GameStore.start(game_id, Mah.Mahjong.Game.new()),
-         :ok <- Mah.Game.add_player(game_id, first_player_id) do
-      {:ok, game_id}
-    end
-  end
-
-  defp join_game(game_id, player_id) do
-    with :ok <- Mah.Game.add_player(game_id, player_id) do
       {:ok, game_id}
     end
   end
