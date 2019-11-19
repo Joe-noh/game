@@ -11,12 +11,19 @@ defmodule MahWeb.ParticipationController do
 
     case Matching.find_participation(player_id) do
       nil ->
-        {:ok, participation} = Matching.create_table_or_participate(user)
-        render_201(conn, participation.table_id)
+        {:ok, %{table_id: table_id}} = Matching.create_table_or_participate(user)
+        spawn_game(table_id, player_id)
+        render_201(conn, table_id)
 
       %Matching.Participation{table_id: table_id} ->
+        spawn_game(table_id, player_id)
         render_201(conn, table_id)
     end
+  end
+
+  defp spawn_game(table_id, player_id) do
+    Matching.spawn_game(table_id)
+    Mah.Game.add_player(table_id, player_id)
   end
 
   defp render_201(conn, game_id) do

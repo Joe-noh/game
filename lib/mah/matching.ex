@@ -8,6 +8,10 @@ defmodule Mah.Matching do
   alias Mah.Repo
   alias Mah.Matching.{Participation, Table}
 
+  def find_table(table_id) do
+    Repo.get(Table, table_id)
+  end
+
   def find_participatable_table do
     finished = Table.status(:finished)
 
@@ -61,14 +65,19 @@ defmodule Mah.Matching do
     end
   end
 
-  def spawn_game(table = %Table{id: game_id}) do
-    game = Mah.Mahjong.Game.new()
-    players = Ecto.assoc(table, :players) |> Repo.all()
+  def spawn_game(game_id) do
+    if Mah.GameStore.alive?(game_id) do
+      {:error, :already_started}
+    else
+      game = Mah.Mahjong.Game.new()
+      table = find_table(game_id)
+      players = Ecto.assoc(table, :players) |> Repo.all()
 
-    with {:ok, _pid} <- Mah.GameStore.start(game_id, game) do
-      Enum.each(players, fn player -> :ok = Mah.Game.add_player(game_id, player.id) end)
+      with {:ok, _pid} <- Mah.GameStore.start(game_id, game) do
+        Enum.each(players, fn player -> :ok = Mah.Game.add_player(game_id, player.id) end)
 
-      {:ok, game_id}
+        {:ok, game_id}
+      end
     end
   end
 end
