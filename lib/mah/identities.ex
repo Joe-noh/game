@@ -8,6 +8,12 @@ defmodule Mah.Identities do
     Repo.get!(User, id)
   end
 
+  def get_user_by(condition) do
+    User
+    |> where([u], ^condition)
+    |> Repo.one()
+  end
+
   def get_social_account_by(provider: provider, uid: uid) do
     SocialAccount
     |> where([s], s.provider == ^provider and s.uid == ^uid)

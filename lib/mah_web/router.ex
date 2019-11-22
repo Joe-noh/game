@@ -26,6 +26,6 @@ defmodule MahWeb.Router do
     pipe_through [:api]
 
     resources "/users", UserController, only: [:create]
-    resources "/guests", GuestController, only: [:create]
+    resources "/sessions", SessionController, only: [:create]
   end
 end
