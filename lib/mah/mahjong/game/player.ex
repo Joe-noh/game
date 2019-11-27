@@ -6,7 +6,7 @@ defmodule Mah.Mahjong.Game.Player do
           tsumogiri: bool(),
           reach: bool()
         }
-  @type seki :: 0 | 1 | 2 | 3
+  @type seki :: :ton | :nan | :sha | :pe
   @type t :: %{
           point: integer(),
           tehai: Game.tiles(),
@@ -16,12 +16,13 @@ defmodule Mah.Mahjong.Game.Player do
           seki: seki()
         }
 
+  @derive Jason.Encoder
   defstruct point: 0,
             tehai: [],
             tsumohai: nil,
             furo: [],
             sutehai: [],
-            seki: 0
+            seki: :ton
 
   @spec reach?(player :: t()) :: bool()
   def reach?(%__MODULE__{sutehai: sutehai}) do
@@ -34,7 +35,7 @@ defmodule Mah.Mahjong.Game.Player do
   end
 
   @spec chakuseki(player :: t(), seki :: seki(), point :: non_neg_integer()) :: {:ok, t()} | {:error, atom()}
-  def chakuseki(player, seki, point) when seki in 0..3 do
+  def chakuseki(player, seki, point) when seki in [:ton, :nan, :sha, :pe] do
     {:ok, %__MODULE__{player | point: point, seki: seki}}
   end
 

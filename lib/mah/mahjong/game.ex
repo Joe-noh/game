@@ -117,7 +117,8 @@ defmodule Mah.Mahjong.Game do
       |> Enum.with_index()
       |> Enum.map(fn {{player_id, tehai}, index} ->
         player = Map.get(players, player_id)
-        {:ok, player} = Game.Player.chakuseki(player, index, rule.initial_point)
+        seki = Enum.at(~w[ton nan sha pe]a, index)
+        {:ok, player} = Game.Player.chakuseki(player, seki, rule.initial_point)
         {:ok, player} = Game.Player.haipai(player, tehai)
         {player_id, player}
       end)
