@@ -20,6 +20,7 @@ defmodule MahWeb.Router do
 
     resources "/users", UserController, only: [:show]
     resources "/participations", ParticipationController, only: [:create]
+    resources "/games", GameController, only: [:show]
   end
 
   scope "/api", MahWeb do

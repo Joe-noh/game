@@ -19,6 +19,7 @@ defmodule Mah.Mahjong.Game do
           wanpai: tiles()
         }
 
+  @derive Jason.Encoder
   defstruct rule: %Game.Rule{},
             started: false,
             ready_players: [],
