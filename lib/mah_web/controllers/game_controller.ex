@@ -1,8 +1,6 @@
 defmodule MahWeb.GameController do
   use MahWeb, :controller
 
-  alias Mah.Identities
-
   action_fallback MahWeb.FallbackController
 
   def show(conn, %{"id" => id}) do
