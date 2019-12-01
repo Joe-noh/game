@@ -6,7 +6,7 @@ defmodule Mah.Repo.Migrations.CreateSocialAccounts do
       add :id, :binary_id, primary_key: true
       add :uid, :string, null: false
       add :provider, :string, null: false
-      add :user_id, references(:users, on_delete: :nothing, type: :binary_id), null: false
+      add :user_id, references(:users, on_delete: :delete_all, type: :binary_id), null: false
 
       timestamps()
     end

@@ -10,7 +10,6 @@ defmodule Mah.Application do
       Mah.Repo,
       MahWeb.Endpoint,
       MahWeb.Presence,
-      Mah.Matching.Server,
       {Horde.Supervisor, name: Mah.GameStoreSupervisor, strategy: :one_for_one},
       {Horde.Registry, name: Mah.GameStoreRegistry, keys: :unique},
       {Cluster.Supervisor, [topologies, [name: Mah.ClusterSupervisor]]},

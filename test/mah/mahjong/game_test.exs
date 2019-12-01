@@ -3,6 +3,40 @@ defmodule Mah.Mahjong.GameTest do
 
   alias Mah.Mahjong.Game
 
+  describe "startable?" do
+    setup [:one_more_player]
+
+    test "returns true if all players ready", context do
+      %{game: game} = one_more_player(context)
+
+      assert false == Game.startable?(game)
+      {:ok, game} = Game.add_player(game, "p4")
+      assert false == Game.startable?(game)
+      {:ok, game} = Game.ready_player(game, "p4")
+      assert true == Game.startable?(game)
+    end
+
+    test "returns false if it already started", context do
+      %{game: game} = startable_game(context)
+
+      assert true == Game.startable?(game)
+      game = %Game{game | started: true}
+      assert false == Game.startable?(game)
+    end
+  end
+
+  describe "participated?" do
+    setup [:one_more_player]
+
+    test "returns true when already in players", %{game: game} do
+      assert true == Game.participated?(game, "p1")
+    end
+
+    test "returns false when not in players", %{game: game} do
+      assert false == Game.participated?(game, "p4")
+    end
+  end
+
   describe "add_player/2" do
     setup do
       %{game: Game.new(%Game.Rule{})}
@@ -40,7 +74,7 @@ defmodule Mah.Mahjong.GameTest do
     test "set sekijun", %{game: game} do
       Enum.each(game.players, fn {_id, player} ->
         refute player.seki |> is_nil
-        assert player.seki in 0..3
+        assert player.seki in ~w[ton nan sha pe]a
       end)
     end
 
@@ -71,14 +105,29 @@ defmodule Mah.Mahjong.GameTest do
     test "set tsumoban player", %{game: game} do
       tsumoban = Map.get(game.players, game.tsumoban)
 
-      assert tsumoban.seki == 0
+      assert tsumoban.seki == :ton
     end
   end
 
-  defp startable_game(_) do
-    game = Game.new(%Game.Rule{})
-    game = Enum.reduce(~w[p1 p2 p3 p4], game, fn id, acc -> Game.add_player(acc, id) |> elem(1) end)
+  defp one_more_player(_) do
+    game = Game.new(%Game.Rule{num_players: 4})
+    game = add_and_ready(game, ~w[p1 p2 p3])
 
     %{game: game}
+  end
+
+  defp startable_game(_) do
+    game = Game.new(%Game.Rule{num_players: 4})
+    game = add_and_ready(game, ~w[p1 p2 p3 p4])
+
+    %{game: game}
+  end
+
+  defp add_and_ready(game, players) do
+    Enum.reduce(players, game, fn id, acc ->
+      {:ok, acc} = Game.add_player(acc, id)
+      {:ok, acc} = Game.ready_player(acc, id)
+      acc
+    end)
   end
 end

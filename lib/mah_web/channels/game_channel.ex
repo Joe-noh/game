@@ -3,8 +3,8 @@ defmodule MahWeb.GameChannel do
 
   alias MahWeb.GameChannel.EventPusher
 
-  def join("game:" <> game_id, _payload, socket) do
-    if Mah.Game.alive?(game_id) do
+  def join("game:" <> game_id, _payload, socket = %{assigns: %{user_id: user_id}}) do
+    if Mah.Game.alive?(game_id) && Mah.Game.participated?(game_id, user_id) do
       send(self(), :track_presence)
 
       {:ok, assign(socket, :game_id, game_id)}
@@ -14,17 +14,13 @@ defmodule MahWeb.GameChannel do
   end
 
   def handle_in("ready", _, socket = %{assigns: %{user_id: user_id, game_id: game_id}}) do
-    if {:ok, :startable} == Mah.Game.player_ready(game_id, user_id) do
-      players = MahWeb.Presence.list(socket) |> Map.keys()
+    Mah.Game.ready_player(game_id, user_id)
 
-      if Mah.Game.startable_with?(game_id, players) do
-        {:ok, %{player: player, tsumohai: tsumohai}} = Mah.Game.start_game(game_id)
-        {:ok, players} = Mah.Game.players(game_id)
-        {:ok, hands} = Mah.Game.hands(game_id)
+    if :ok == Mah.Game.start(game_id) do
+      EventPusher.game_start(game_id)
 
-        EventPusher.game_start(%{players: players, hands: hands})
-        EventPusher.tsumo(%{player: player, players: players, tsumohai: tsumohai})
-      end
+      :ok = Mah.Game.tsumo(game_id)
+      EventPusher.tsumo(game_id)
     end
 
     {:noreply, socket}

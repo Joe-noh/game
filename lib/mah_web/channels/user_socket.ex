@@ -13,7 +13,6 @@ defmodule MahWeb.UserSocket do
     end
   end
 
-  def id(socket) do
-    "user:#{socket.assigns.user_id}"
-  end
+  def id(%{assigns: %{user_id: user_id}}), do: id(user_id)
+  def id(user_id), do: "user:#{user_id}"
 end

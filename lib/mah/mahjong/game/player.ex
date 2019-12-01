@@ -6,7 +6,7 @@ defmodule Mah.Mahjong.Game.Player do
           tsumogiri: bool(),
           reach: bool()
         }
-  @type seki :: 0 | 1 | 2 | 3
+  @type seki :: :ton | :nan | :sha | :pe
   @type t :: %{
           point: integer(),
           tehai: Game.tiles(),
@@ -16,25 +16,31 @@ defmodule Mah.Mahjong.Game.Player do
           seki: seki()
         }
 
+  @derive Jason.Encoder
   defstruct point: 0,
             tehai: [],
             tsumohai: nil,
             furo: [],
             sutehai: [],
-            seki: 0
+            seki: :ton
 
   @spec reach?(player :: t()) :: bool()
   def reach?(%__MODULE__{sutehai: sutehai}) do
     Enum.any?(sutehai, fn s -> Map.get(s, :reach) end)
   end
 
+  @spec mask_hands(player :: t()) :: t()
+  def mask_hands(player) do
+    %__MODULE__{player | tehai: [], tsumohai: nil}
+  end
+
   @spec chakuseki(player :: t(), seki :: seki(), point :: non_neg_integer()) :: {:ok, t()} | {:error, atom()}
-  def chakuseki(player, seki, point) when seki in 0..3 do
+  def chakuseki(player, seki, point) when seki in [:ton, :nan, :sha, :pe] do
     {:ok, %__MODULE__{player | point: point, seki: seki}}
   end
 
   def chakuseki(_player, _seki) do
-    {:error, :invalid}
+    {:error, :invalid_chair_number}
   end
 
   @spec haipai(player :: t(), tiles :: Game.tiles()) :: {:ok, t()}
@@ -48,7 +54,7 @@ defmodule Mah.Mahjong.Game.Player do
   end
 
   def tsumo(_player, _tile) do
-    {:error, :invalid}
+    {:error, :already_have_tile}
   end
 
   @spec dahai(player :: t(), hai :: Game.tile(), opts :: [reach: bool()]) :: {:ok, t()} | {:error, atom()}
@@ -65,7 +71,7 @@ defmodule Mah.Mahjong.Game.Player do
   defp do_dahai(player = %__MODULE__{tsumohai: hai, sutehai: sutehai}, hai, opts) do
     reach = Keyword.get(opts, :reach, false)
     sutehai = [%{hai: hai, tsumogiri: true, reach: reach} | sutehai]
-    player = %__MODULE__{player | sutehai: sutehai}
+    player = %__MODULE__{player | tsumohai: nil, sutehai: sutehai}
 
     {:ok, player}
   end

@@ -8,6 +8,8 @@ defmodule Mah.Mahjong.Game do
   @type tiles :: list(tile())
   @type t :: %{
           rule: Game.Rule.t(),
+          started: boolean(),
+          ready_players: list(player_id()),
           honba: non_neg_integer(),
           round: pos_integer(),
           tsumoban: player_id() | nil,
@@ -17,7 +19,10 @@ defmodule Mah.Mahjong.Game do
           wanpai: tiles()
         }
 
+  @derive Jason.Encoder
   defstruct rule: %Game.Rule{},
+            started: false,
+            ready_players: [],
             honba: 0,
             round: 1,
             tsumoban: nil,
@@ -27,8 +32,39 @@ defmodule Mah.Mahjong.Game do
             rinshanhai: [],
             wanpai: []
 
-  def new(rule = %Game.Rule{}) do
+  def new(rule \\ %Game.Rule{}) do
     %__MODULE__{rule: rule}
+  end
+
+  @spec startable?(t()) :: boolean()
+  def startable?(%__MODULE__{started: true}), do: false
+
+  def startable?(%__MODULE__{started: false, ready_players: ready_players, rule: rule}) do
+    length(ready_players) == rule.num_players
+  end
+
+  def participated?(game = %__MODULE__{}, player_id) do
+    player_id in players(game)
+  end
+
+  def players(%__MODULE__{players: players}) do
+    Map.keys(players)
+  end
+
+  def tsumoban(%__MODULE__{tsumoban: tsumoban}), do: tsumoban
+
+  def tsumohai(%__MODULE__{tsumohai: tsumohai}), do: tsumohai
+
+  def masked_for(game = %__MODULE__{players: players}, player_id) do
+    players =
+      players
+      |> Enum.map(fn
+        {^player_id, player} -> {player_id, player}
+        {other_id, player} -> {other_id, Game.Player.mask_hands(player)}
+      end)
+      |> Enum.into(%{})
+
+    %__MODULE__{game | players: players, yamahai: [], rinshanhai: [], wanpai: []}
   end
 
   def add_player(game = %__MODULE__{rule: rule, players: players}, player_id) do
@@ -45,16 +81,25 @@ defmodule Mah.Mahjong.Game do
     end
   end
 
-  def startable?(%__MODULE__{players: players, rule: rule}) do
-    map_size(players) == rule.num_players
+  def ready_player(game = %__MODULE__{ready_players: ready_players, players: players}, player_id) do
+    if player_id in Map.keys(players) do
+      ready_players = Enum.uniq([player_id | ready_players])
+      {:ok, %__MODULE__{game | ready_players: ready_players}}
+    else
+      {:error, :not_joined}
+    end
+  end
+
+  def start(game) do
+    if startable?(game) do
+      {:ok, do_haipai(%__MODULE__{game | started: true})}
+    else
+      {:error, :not_startable}
+    end
   end
 
   def haipai(game) do
-    if startable?(game) do
-      {:ok, do_haipai(game)}
-    else
-      {:error, :not_enough_players}
-    end
+    {:ok, do_haipai(%__MODULE__{game | started: true})}
   end
 
   defp do_haipai(game = %__MODULE__{rule: rule, players: players}) do
@@ -73,7 +118,8 @@ defmodule Mah.Mahjong.Game do
       |> Enum.with_index()
       |> Enum.map(fn {{player_id, tehai}, index} ->
         player = Map.get(players, player_id)
-        {:ok, player} = Game.Player.chakuseki(player, index, rule.initial_point)
+        seki = Enum.at(~w[ton nan sha pe]a, index)
+        {:ok, player} = Game.Player.chakuseki(player, seki, rule.initial_point)
         {:ok, player} = Game.Player.haipai(player, tehai)
         {player_id, player}
       end)
@@ -90,8 +136,8 @@ defmodule Mah.Mahjong.Game do
     player = Map.get(players, tsumoban)
 
     with {:ok, player} <- Game.Player.tsumo(player, tsumohai) do
-      players = Map.update!(players, tsumoban, player)
-      %__MODULE__{game | yamahai: yamahai, players: players}
+      players = Map.put(players, tsumoban, player)
+      {:ok, %__MODULE__{game | yamahai: yamahai, players: players}}
     end
   end
 
@@ -100,7 +146,7 @@ defmodule Mah.Mahjong.Game do
 
     with {:ok, player} <- Game.Player.dahai(player, hai, reach: reach),
          {:ok, game} <- proceed_tsumoban(game) do
-      %__MODULE__{game | players: Map.update!(players, player_id, player)}
+      {:ok, %__MODULE__{game | players: Map.update!(players, player_id, player)}}
     end
   end
 

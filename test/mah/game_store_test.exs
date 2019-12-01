@@ -20,28 +20,20 @@ defmodule Mah.GameStoreTest do
     end
   end
 
-  describe "get/1" do
+  describe "get/2" do
     test "returns state", %{uuid: uuid} do
       {:ok, _pid} = GameStore.start(uuid, :hello)
 
-      assert :hello == GameStore.get(uuid)
-    end
-
-    test "returns error on not found" do
-      assert {:error, :not_found} == GameStore.get("unstarted")
+      assert :hello == GameStore.get(uuid, & &1)
     end
   end
 
-  describe "put/2" do
+  describe "update/2" do
     test "updates state", %{uuid: uuid} do
-      {:ok, _pid} = GameStore.start(uuid, :a)
+      {:ok, _pid} = GameStore.start(uuid, 1)
 
-      assert :ok = GameStore.put(uuid, :b)
-      assert :b == GameStore.get(uuid)
-    end
-
-    test "returns error on not found" do
-      assert {:error, :not_found} == GameStore.put("unstarted", :hey)
+      assert :ok = GameStore.update(uuid, &{:ok, &1 + 1})
+      assert 2 == GameStore.get(uuid, & &1)
     end
   end
 
@@ -50,11 +42,19 @@ defmodule Mah.GameStoreTest do
       {:ok, _pid} = GameStore.start(uuid, :a)
 
       assert :ok == GameStore.stop(uuid)
-      assert {:error, :not_found} == GameStore.get(uuid)
+      assert false == GameStore.alive?(uuid)
+    end
+  end
+
+  describe "alive?/1" do
+    test "returns true if process is alive", %{uuid: uuid} do
+      {:ok, _pid} = GameStore.start(uuid, :state)
+
+      assert true == GameStore.alive?(uuid)
     end
 
-    test "returns error on not found" do
-      assert {:error, :not_found} == GameStore.stop("unstarted")
+    test "returns false if process does not exist", %{uuid: uuid} do
+      assert false == GameStore.alive?(uuid)
     end
   end
 end

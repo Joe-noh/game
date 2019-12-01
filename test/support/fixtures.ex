@@ -40,13 +40,4 @@ defmodule Fixtures do
 
     {:ok, resources}
   end
-
-  defp stringify_keys(attrs) do
-    attrs
-    |> Enum.map(fn
-      {k, v} when is_atom(k) -> {Atom.to_string(k), v}
-      {k, v} when is_binary(k) -> {k, v}
-    end)
-    |> Enum.into(%{})
-  end
 end
