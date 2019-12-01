@@ -74,7 +74,7 @@ defmodule Mah.Mahjong.GameTest do
     test "set sekijun", %{game: game} do
       Enum.each(game.players, fn {_id, player} ->
         refute player.seki |> is_nil
-        assert player.seki in 0..3
+        assert player.seki in ~w[ton nan sha pe]a
       end)
     end
 
@@ -105,7 +105,7 @@ defmodule Mah.Mahjong.GameTest do
     test "set tsumoban player", %{game: game} do
       tsumoban = Map.get(game.players, game.tsumoban)
 
-      assert tsumoban.seki == 0
+      assert tsumoban.seki == :ton
     end
   end
 

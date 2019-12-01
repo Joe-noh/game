@@ -9,6 +9,7 @@ defmodule Mah.Mahjong.Game.Call do
           tiles: Game.tiles()
         }
 
+  @derive Jason.Encoder
   defstruct type: :chi,
             from: :kamicha,
             tiles: []

@@ -8,6 +8,10 @@ defmodule Mah.Game do
 
   defdelegate alive?(game_id), to: Mah.GameStore
 
+  def masked_for(game_id, player_id) do
+    GameStore.get(game_id, &Game.masked_for(&1, player_id))
+  end
+
   def startable?(game_id) do
     GameStore.get(game_id, &Game.startable?(&1))
   end
@@ -47,10 +51,4 @@ defmodule Mah.Game do
   def tsumo(game_id) do
     GameStore.update(game_id, &Game.tsumo(&1))
   end
-
-  defdelegate hands(game_id), to: Mah.Game.Server
-  defdelegate start_game(game_id), to: Mah.Game.Server
-  defdelegate dahai(game_id, player_id, hai), to: Mah.Game.Server
-  defdelegate next_tsumo(game_id), to: Mah.Game.Server
-  defdelegate state(game_id), to: Mah.Game.Server
 end
