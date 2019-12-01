@@ -32,10 +32,6 @@ defmodule Mah.Game do
     GameStore.get(game_id, &Game.tsumohai(&1))
   end
 
-  def masked_for(game_id, player_id) do
-    GameStore.get(game_id, &Game.masked_for(&1, player_id))
-  end
-
   def add_player(game_id, player_id) do
     GameStore.update(game_id, &Game.add_player(&1, player_id))
   end
